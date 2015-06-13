@@ -2,7 +2,7 @@
 " Filename: indent/haskell.vim
 " Author: itchyny
 " License: MIT License
-" Last Change: 2015/06/14 02:58:50.
+" Last Change: 2015/06/14 03:00:14.
 " =============================================================================
 
 let s:save_cpo = &cpo
@@ -52,6 +52,10 @@ function! GetHaskellIndent() abort
 
   if line =~# '^\s*\<where\>'
     return match(line, '^\s*\<where\>\s*\zs')
+  endif
+
+  if line =~# '\<case\>.*\<of\>\s*$'
+    return match(line, '.*\<case\>\s*\zs')
   endif
 
   return indent(prevnonblank(v:lnum - 1))
