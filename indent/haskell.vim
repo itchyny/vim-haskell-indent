@@ -2,7 +2,7 @@
 " Filename: indent/haskell.vim
 " Author: itchyny
 " License: MIT License
-" Last Change: 2015/06/14 08:29:11.
+" Last Change: 2015/06/14 08:29:38.
 " =============================================================================
 
 let s:save_cpo = &cpo
@@ -106,6 +106,26 @@ function! GetHaskellIndent() abort
       endif
       let i -= 1
     endwhile
+  endif
+
+  if prevnonblank(v:lnum - 1) < line('.') - 1
+    let i = prevnonblank(v:lnum - 1)
+    let where_clause = 0
+    let indent = indent(prevnonblank(v:lnum - 1))
+    while i
+      let line = getline(i)
+      if line =~# '\<where\>'
+        let where_clause += 1
+        if where_clause == line('.') - prevnonblank(v:lnum - 1)
+          return match(line, '^.*\<where\>\s*\zs')
+        endif
+      endif
+      if 0 <= indent(i) && indent(i) < indent
+        return indent(i)
+      endif
+      let i -= 1
+    endwhile
+    return 0
   endif
 
   return indent(prevnonblank(v:lnum - 1))
