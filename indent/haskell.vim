@@ -2,7 +2,7 @@
 " Filename: indent/haskell.vim
 " Author: itchyny
 " License: MIT License
-" Last Change: 2015/06/14 02:27:15.
+" Last Change: 2015/06/14 02:43:02.
 " =============================================================================
 
 let s:save_cpo = &cpo
@@ -23,11 +23,13 @@ function! GetHaskellIndent() abort
     return 0
   endif
 
+  let nonblankline = getline(prevnonblank(v:lnum - 1))
+
   let line = getline(line('.') - 1)
 
-  if line =~# '^.*[^|]|[^|]'
-    if line =~# '[^|]| *\%(otherwise\|True\|0 *< *1\|1 *> *0\)'
-      let i = line('.') - 1
+  if nonblankline =~# '^.*[^|]|[^|]'
+    if nonblankline =~# '[^|]| *\%(otherwise\|True\|0 *< *1\|1 *> *0\)'
+      let i = prevnonblank(v:lnum - 1)
       while i
         let line = getline(i)
         if getline(i) !~# '^\s*|'
