@@ -2,7 +2,7 @@
 " Filename: indent/haskell.vim
 " Author: itchyny
 " License: MIT License
-" Last Change: 2015/06/21 21:07:54.
+" Last Change: 2015/06/22 06:40:49.
 " =============================================================================
 
 if exists('b:did_indent')
@@ -12,7 +12,7 @@ endif
 let b:did_indent = 1
 
 setlocal indentexpr=GetHaskellIndent()
-setlocal indentkeys=!^F,o,O,=where
+setlocal indentkeys=!^F,o,O,=where,<bar>
 
 let s:save_cpo = &cpo
 set cpo&vim
@@ -22,6 +22,11 @@ function! GetHaskellIndent() abort
   " =where
   if getline('.') =~# '\<where\>\s*$'
     return s:reindent_where()
+  endif
+
+  " |
+  if getline('.') =~# '|\s*$'
+    return s:indent_bar()
   endif
 
   if prevnonblank(v:lnum - 1) == 0
@@ -145,6 +150,25 @@ function! s:reindent_where() abort
       let line = getline(i)
       if line =~# '^\s*\%(\<where\>\)\?\s*\h.*='
         return match(line, '^\s*\%(\<where\>\)\?\s*\zs') + &shiftwidth
+      endif
+      let i -= 1
+    endwhile
+  endif
+  return -1
+endfunction
+
+" |
+function! s:indent_bar() abort
+  if getline('.') =~# '^\s*|\s*$'
+    let i = prevnonblank(v:lnum - 1)
+    while i > 0
+      let line = getline(i)
+      if line =~# '^\s*\%(\<where\>\)\?.*[^|]|[^|].*='
+        return match(line, '^\s*\%(\<where\>\)\?.*\zs|')
+      elseif line =~# '\<data\>.*='
+        return match(line, '^.*\<data\>.*\zs=')
+      elseif line =~# '^\S'
+        return -1
       endif
       let i -= 1
     endwhile
