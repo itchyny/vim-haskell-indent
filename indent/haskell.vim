@@ -2,7 +2,7 @@
 " Filename: indent/haskell.vim
 " Author: itchyny
 " License: MIT License
-" Last Change: 2015/06/15 01:04:35.
+" Last Change: 2015/06/21 20:13:03.
 " =============================================================================
 
 if exists('b:did_indent')
@@ -70,8 +70,8 @@ function! GetHaskellIndent() abort
     return match(line, '^.*\zs\<where\>') + &shiftwidth
   endif
 
-  if line =~# '^.*\<where\>'
-    return match(line, '^.*\<where\>\s*\zs')
+  if line =~# '^\s*\<where\>'
+    return match(line, '^\s*\<where\>\s*\zs')
   endif
 
   if line =~# '\<if\>'
