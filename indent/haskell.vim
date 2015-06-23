@@ -2,7 +2,7 @@
 " Filename: indent/haskell.vim
 " Author: itchyny
 " License: MIT License
-" Last Change: 2015/06/22 21:33:34.
+" Last Change: 2015/06/23 21:28:09.
 " =============================================================================
 
 if exists('b:did_indent')
@@ -12,7 +12,7 @@ endif
 let b:did_indent = 1
 
 setlocal indentexpr=GetHaskellIndent()
-setlocal indentkeys=!^F,o,O,=where,<bar>
+setlocal indentkeys=!^F,o,O,=where,=deri,<bar>
 
 let s:save_cpo = &cpo
 set cpo&vim
@@ -22,6 +22,11 @@ function! GetHaskellIndent() abort
   " =where
   if getline('.') =~# '\<where\>\s*$'
     return s:reindent_where()
+  endif
+
+  " =deriving
+  if getline(v:lnum) =~# '\<deri\%[ving]\>\s*$'
+    return s:indent_deriving()
   endif
 
   " |
@@ -154,6 +159,26 @@ function! s:reindent_where() abort
       let line = getline(i)
       if line =~# '^\s*\%(\<where\>\)\?\s*\h.*='
         return match(line, '^\s*\%(\<where\>\)\?\s*\zs') + &shiftwidth
+      endif
+      let i -= 1
+    endwhile
+  endif
+  return -1
+endfunction
+
+" indent deriving
+function! s:indent_deriving() abort
+  if prevnonblank(v:lnum - 1) < v:lnum - 1
+    return 0
+  endif
+  if getline(v:lnum) =~# '^\s*\<deri\%[ving]\>\s*$'
+    let i = prevnonblank(v:lnum - 1)
+    while i > 0
+      let line = getline(i)
+      if line =~# '\<data\>.*='
+        return match(line, '^.*\<data\>.*\zs=')
+      elseif line =~# '^\S'
+        return -1
       endif
       let i -= 1
     endwhile
