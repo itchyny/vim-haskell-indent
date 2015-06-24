@@ -2,7 +2,7 @@
 " Filename: indent/haskell.vim
 " Author: itchyny
 " License: MIT License
-" Last Change: 2015/06/23 21:31:16.
+" Last Change: 2015/06/24 23:49:44.
 " =============================================================================
 
 if exists('b:did_indent')
@@ -21,12 +21,12 @@ function! GetHaskellIndent() abort
 
   " =where
   if getline('.') =~# '\<where\>\s*$'
-    return s:reindent_where()
+    return s:indent('^\s*\<where\>\s*$', '^\s*\%(\<where\>\)\?\s*\zs\h.*=', &shiftwidth)
   endif
 
   " =deriving
   if getline(v:lnum) =~# '\<deri\%[ving]\>\s*$'
-    return s:indent_deriving()
+    return s:indent('^\s*\<deri\%[ving]\>\s*$', '^.*\<data\>.*\zs=', 0)
   endif
 
   " |
@@ -47,7 +47,7 @@ function! GetHaskellIndent() abort
   endif
 
   if nonblankline =~# '^\s*\<deriving\>'
-    return s:after_deriving()
+    return s:indent('', '^.*\zs\<data\>.*=', 0)
   endif
 
   if nonblankline =~# '^.*[^|]|[^|]'
@@ -153,32 +153,17 @@ function! GetHaskellIndent() abort
 
 endfunction
 
-" =where
-function! s:reindent_where() abort
-  if getline('.') =~# '^\s*\<where\>\s*$'
-    let i = prevnonblank(v:lnum - 1)
-    while i > 0
-      let line = getline(i)
-      if line =~# '^\s*\%(\<where\>\)\?\s*\h.*='
-        return match(line, '^\s*\%(\<where\>\)\?\s*\zs') + &shiftwidth
-      endif
-      let i -= 1
-    endwhile
-  endif
-  return -1
-endfunction
-
-" indent deriving
-function! s:indent_deriving() abort
-  if prevnonblank(v:lnum - 1) < v:lnum - 1
+" a general indent function by searching the pattern upward
+function! s:indent(linepattern, pattern, diff) abort
+  let i = prevnonblank(v:lnum - 1)
+  if i < v:lnum - 1
     return 0
   endif
-  if getline(v:lnum) =~# '^\s*\<deri\%[ving]\>\s*$'
-    let i = prevnonblank(v:lnum - 1)
+  if getline(v:lnum) =~# a:linepattern
     while i > 0
       let line = getline(i)
-      if line =~# '\<data\>.*='
-        return match(line, '^.*\<data\>.*\zs=')
+      if line =~# a:pattern
+        return match(line, a:pattern) + a:diff
       elseif line =~# '^\S'
         return -1
       endif
@@ -204,22 +189,6 @@ function! s:indent_bar() abort
       let i -= 1
     endwhile
   endif
-  return -1
-endfunction
-
-" deriving
-function! s:after_deriving() abort
-  if prevnonblank(v:lnum - 1) < v:lnum - 1
-    return 0
-  endif
-  let i = prevnonblank(v:lnum - 1)
-  while i > 0
-    let line = getline(i)
-    if line =~# '^\s*\%(\<data\>\).*='
-      return match(line, '^.*\zs\<data\>.*=')
-    endif
-    let i -= 1
-  endwhile
   return -1
 endfunction
 
