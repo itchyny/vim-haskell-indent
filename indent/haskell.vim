@@ -2,7 +2,7 @@
 " Filename: indent/haskell.vim
 " Author: itchyny
 " License: MIT License
-" Last Change: 2015/06/25 09:11:00.
+" Last Change: 2015/06/28 01:14:30.
 " =============================================================================
 
 if exists('b:did_indent')
@@ -48,6 +48,10 @@ function! GetHaskellIndent() abort
     else
       return match(nonblankline, '^\s*[^()\[\]{}]*\zs[(\[{]')
     endif
+  endif
+
+  if nonblankline =~# '[)}\]]\s*$'
+    return s:unindent_after_parenthesis(prevnonblank(v:lnum - 1), match(nonblankline, '[)}\]]\s*$'))
   endif
 
   if nonblankline =~# '\<do\>\s*$'
@@ -198,6 +202,35 @@ function! s:indent_bar() abort
     endwhile
   endif
   return -1
+endfunction
+
+function! s:unindent_after_parenthesis(line, column) abort
+  let pos = getpos('.')
+  let view = winsaveview()
+  execute 'normal! ' a:line . 'gg' . a:column . '|'
+  let end = getpos('.')
+  normal! %
+  let begin = getpos('.')
+  call setpos('.', pos)
+  call winrestview(view)
+  if begin[1] != end[1]
+    let line = getline(begin[1])
+    if line =~# '\<deriving\>'
+      let i = begin[1]
+      while i
+        let line = getline(i)
+        if getline(i) =~# '\<data\>'
+          return match(line, '\<data\>')
+        elseif line =~# '^\S'
+          return -1
+        endif
+        let i -= 1
+      endwhile
+    endif
+    return match(line, '^\s*\%(\<where\>\|\<let\>\)\?\s*\zs')
+  else
+    return match(getline(end[1]), '^\s*\%(\<where\>\|\<let\>\)\?\s*\zs')
+  endif
 endfunction
 
 let &cpo = s:save_cpo
