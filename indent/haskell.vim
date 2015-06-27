@@ -2,7 +2,7 @@
 " Filename: indent/haskell.vim
 " Author: itchyny
 " License: MIT License
-" Last Change: 2015/06/28 01:14:30.
+" Last Change: 2015/06/28 01:40:15.
 " =============================================================================
 
 if exists('b:did_indent')
@@ -204,6 +204,7 @@ function! s:indent_bar() abort
   return -1
 endfunction
 
+" unindent after closed parenthesis
 function! s:unindent_after_parenthesis(line, column) abort
   let pos = getpos('.')
   let view = winsaveview()
