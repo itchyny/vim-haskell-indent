@@ -2,7 +2,7 @@
 " Filename: indent/haskell.vim
 " Author: itchyny
 " License: MIT License
-" Last Change: 2015/06/29 05:24:08.
+" Last Change: 2015/06/29 06:06:59.
 " =============================================================================
 
 if exists('b:did_indent')
@@ -23,7 +23,7 @@ function! GetHaskellIndent() abort
 
   " where
   if line =~# '\<wher\%[e]\>'
-    return s:indent('^\s*\<wher\%[e]\>', '^\s*\%(\<where\>\)\?\s*\zs\h.*=', &shiftwidth)
+    return s:indent('^\s*\<wher\%[e]\>', '^\s*\%(\<where\>\)\?\s*\zs\h.*=\|^\s*[^|]', &shiftwidth)
   endif
 
   " deriving
@@ -121,12 +121,8 @@ function! GetHaskellIndent() abort
     endif
   endif
 
-  if line =~# '^.*\<where\>\s*$'
-    return match(line, '^.*\zs\<where\>') + &shiftwidth
-  endif
-
-  if line =~# '^\s*\<where\>'
-    return match(line, '^\s*\<where\>\s*\zs')
+  if nonblankline =~# '\<where\>'
+    return s:after_where()
   endif
 
   if line =~# '\<if\>'
@@ -196,7 +192,7 @@ function! GetHaskellIndent() abort
 endfunction
 
 " a general indent function by searching the pattern upward
-function! s:indent(linepattern, pattern, diff) abort
+function! s:indent(linepattern, pattern, diff, ...) abort
   let i = prevnonblank(v:lnum - 1)
   if i < v:lnum - 1
     return 0
@@ -207,7 +203,7 @@ function! s:indent(linepattern, pattern, diff) abort
       if line =~# a:pattern
         return match(line, a:pattern) + a:diff
       elseif line =~# '^\S'
-        return -1
+        return a:0 ? a:1 : -1
       endif
       let i -= 1
     endwhile
@@ -277,6 +273,18 @@ function! s:unindent_after_parenthesis(line, column) abort
     endwhile
   endif
   return match(getline(begin[1]), '^\s*\%(\<where\>\|\<let\>\)\?\s*\zs')
+endfunction
+
+" where
+function! s:after_where() abort
+  let line = getline(prevnonblank(v:lnum - 1))
+  if line =~# '\<where\>\s*$'
+    return s:indent('', '\<class\>', &shiftwidth, match(line, '\<where\>') + &shiftwidth)
+  elseif line =~# '^\s*\<where\>'
+    return match(line, '\<where\>\s*\zs')
+  else
+    return indent(prevnonblank(v:lnum - 1))
+  endif
 endfunction
 
 let &cpo = s:save_cpo
