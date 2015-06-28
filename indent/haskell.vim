@@ -2,7 +2,7 @@
 " Filename: indent/haskell.vim
 " Author: itchyny
 " License: MIT License
-" Last Change: 2015/06/29 01:09:56.
+" Last Change: 2015/06/29 01:44:33.
 " =============================================================================
 
 if exists('b:did_indent')
@@ -42,6 +42,11 @@ function! GetHaskellIndent() abort
   " }
   if getline(v:lnum) =~# '}$'
     return s:indent_brace()
+  endif
+
+  " ::
+  if line =~# '::$'
+    return s:indent('::$', line =~# '^\s*,' ? '\%({\s*\)\=\<\w\+\s*::' : '\<\w\+\s*::', 0)
   endif
 
   if prevnonblank(v:lnum - 1) == 0
@@ -149,6 +154,10 @@ function! GetHaskellIndent() abort
       endif
       let i -= 1
     endwhile
+  endif
+
+  if nonblankline =~# '::'
+    return s:indent('', nonblankline =~# ',\s*$' ? '\S' : '{\s*\<\w\+\s*::', 0)
   endif
 
   if prevnonblank(v:lnum - 1) < v:lnum - 1
