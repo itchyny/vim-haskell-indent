@@ -2,7 +2,7 @@
 " Filename: indent/haskell.vim
 " Author: itchyny
 " License: MIT License
-" Last Change: 2015/06/28 23:52:41.
+" Last Change: 2015/06/29 00:10:00.
 " =============================================================================
 
 if exists('b:did_indent')
@@ -34,6 +34,11 @@ function! GetHaskellIndent() abort
     return s:indent_bar()
   endif
 
+  " }
+  if getline(v:lnum) =~# '}$'
+    return s:indent_brace()
+  endif
+
   if prevnonblank(v:lnum - 1) == 0
     return 0
   endif
@@ -58,7 +63,7 @@ function! GetHaskellIndent() abort
     return match(nonblankline, '^\s*\%(\<where\>\|\<let\>\)\?\s*\zs') + &shiftwidth
   endif
 
-  if nonblankline =~# '^\s*\<deriving\>'
+  if nonblankline =~# '\<deriving\>'
     return s:indent('', '^.*\zs\<data\>.*=', 0)
   endif
 
@@ -202,6 +207,16 @@ function! s:indent_bar() abort
     endwhile
   endif
   return -1
+endfunction
+
+function! s:indent_brace() abort
+  let end = getpos('.')
+  let view = winsaveview()
+  normal! %
+  let begin = getpos('.')
+  call setpos('.', end)
+  call winrestview(view)
+  return begin[2] - 1
 endfunction
 
 " unindent after closed parenthesis
