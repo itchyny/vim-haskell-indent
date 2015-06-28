@@ -2,7 +2,7 @@
 " Filename: indent/haskell.vim
 " Author: itchyny
 " License: MIT License
-" Last Change: 2015/06/28 16:27:32.
+" Last Change: 2015/06/28 23:52:41.
 " =============================================================================
 
 if exists('b:did_indent')
@@ -12,7 +12,7 @@ endif
 let b:did_indent = 1
 
 setlocal indentexpr=GetHaskellIndent()
-setlocal indentkeys=!^F,o,O,=wher,=deri,<bar>
+setlocal indentkeys=!^F,o,O,=wher,=deri,0<bar>,0}
 
 let s:save_cpo = &cpo
 set cpo&vim
