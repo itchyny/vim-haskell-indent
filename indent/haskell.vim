@@ -2,7 +2,7 @@
 " Filename: indent/haskell.vim
 " Author: itchyny
 " License: MIT License
-" Last Change: 2015/06/29 00:35:12.
+" Last Change: 2015/06/29 00:35:20.
 " =============================================================================
 
 if exists('b:did_indent')
@@ -219,6 +219,7 @@ function! s:indent_eq() abort
   return match(getline(prevnonblank(v:lnum - 1)), '^\s*\%(\<where\>\|\<let\>\)\?\s*\zs') + &shiftwidth
 endfunction
 
+" }
 function! s:indent_brace() abort
   let end = getpos('.')
   let view = winsaveview()
