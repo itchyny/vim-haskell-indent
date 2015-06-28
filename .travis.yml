@@ -1,7 +1,7 @@
 language: viml
 
 install:
-  - hg clone https://code.google.com/p/vim/ /tmp/vim
+  - git clone --depth=1 https://github.com/vim/vim /tmp/vim
   - (cd /tmp/vim && ./configure && make && sudo make install)
   - git clone https://github.com/thinca/vim-themis /tmp/themis
 
