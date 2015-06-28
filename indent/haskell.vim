@@ -2,7 +2,7 @@
 " Filename: indent/haskell.vim
 " Author: itchyny
 " License: MIT License
-" Last Change: 2015/06/28 01:40:15.
+" Last Change: 2015/06/28 02:02:52.
 " =============================================================================
 
 if exists('b:did_indent')
@@ -20,7 +20,7 @@ set cpo&vim
 function! GetHaskellIndent() abort
 
   " =where
-  if getline('.') =~# '\<where\>\s*$'
+  if getline(v:lnum) =~# '\<where\>\s*$'
     return s:indent('^\s*\<where\>\s*$', '^\s*\%(\<where\>\)\?\s*\zs\h.*=', &shiftwidth)
   endif
 
@@ -30,7 +30,7 @@ function! GetHaskellIndent() abort
   endif
 
   " |
-  if getline('.') =~# '|\s*$'
+  if getline(v:lnum) =~# '|\s*$'
     return s:indent_bar()
   endif
 
@@ -40,7 +40,7 @@ function! GetHaskellIndent() abort
 
   let nonblankline = getline(prevnonblank(v:lnum - 1))
 
-  let line = getline(line('.') - 1)
+  let line = getline(v:lnum - 1)
 
   if nonblankline =~# '^\s*[^()\[\]{}]*[(\[{]\%([^()\[\]{}]*\|([^()\[\]{}]*)\|\[[^()\[\]{}]*\]\)*[-+/*\$&<>,]\?\s*$'
     if nonblankline =~# '[-+/*\$&<>,]\s*$'
@@ -64,10 +64,10 @@ function! GetHaskellIndent() abort
 
   if nonblankline =~# '^.*[^|]|[^|]'
     if line =~# '^\s*$'
-      if prevnonblank(v:lnum - 1) < line('.') - 2
+      if prevnonblank(v:lnum - 1) < v:lnum - 2
         return 0
       endif
-      let i = line('.') - 1
+      let i = v:lnum - 1
       let where_clause = 0
       while i
         let line = getline(i)
@@ -141,7 +141,7 @@ function! GetHaskellIndent() abort
     endwhile
   endif
 
-  if prevnonblank(v:lnum - 1) < line('.') - 1
+  if prevnonblank(v:lnum - 1) < v:lnum - 1
     let i = prevnonblank(v:lnum - 1)
     let where_clause = 0
     let indent = indent(prevnonblank(v:lnum - 1))
@@ -149,7 +149,7 @@ function! GetHaskellIndent() abort
       let line = getline(i)
       if line =~# '\<where\>'
         let where_clause += 1
-        if where_clause == line('.') - prevnonblank(v:lnum - 1)
+        if where_clause == v:lnum - prevnonblank(v:lnum - 1)
           return match(line, '^.*\<where\>\s*\zs')
         endif
       endif
@@ -187,7 +187,7 @@ endfunction
 
 " |
 function! s:indent_bar() abort
-  if getline('.') =~# '^\s*|\s*$'
+  if getline(v:lnum) =~# '^\s*|\s*$'
     let i = prevnonblank(v:lnum - 1)
     while i > 0
       let line = getline(i)
@@ -206,7 +206,7 @@ endfunction
 
 " unindent after closed parenthesis
 function! s:unindent_after_parenthesis(line, column) abort
-  let pos = getpos('.')
+  let pos = getpos(v:lnum)
   let view = winsaveview()
   execute 'normal! ' a:line . 'gg' . a:column . '|'
   let end = getpos('.')
