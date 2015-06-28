@@ -2,7 +2,7 @@
 " Filename: indent/haskell.vim
 " Author: itchyny
 " License: MIT License
-" Last Change: 2015/06/28 11:37:04.
+" Last Change: 2015/06/28 16:27:32.
 " =============================================================================
 
 if exists('b:did_indent')
@@ -206,6 +206,10 @@ endfunction
 
 " unindent after closed parenthesis
 function! s:unindent_after_parenthesis(line, column) abort
+  let i = prevnonblank(v:lnum - 1)
+  if i < v:lnum - 2
+    return 0
+  endif
   let pos = getpos(v:lnum)
   let view = winsaveview()
   execute 'normal! ' a:line . 'gg' . a:column . '|'
@@ -214,24 +218,19 @@ function! s:unindent_after_parenthesis(line, column) abort
   let begin = getpos('.')
   call setpos('.', pos)
   call winrestview(view)
-  if begin[1] != end[1]
-    let line = getline(begin[1])
-    if line =~# '\<deriving\>'
-      let i = begin[1]
-      while i
-        let line = getline(i)
-        if getline(i) =~# '\<data\>'
-          return match(line, '\<data\>')
-        elseif line =~# '^\S'
-          return -1
-        endif
-        let i -= 1
-      endwhile
-    endif
-    return match(line, '^\s*\%(\<where\>\|\<let\>\)\?\s*\zs')
-  else
-    return match(getline(end[1]), '^\s*\%(\<where\>\|\<let\>\)\?\s*\zs')
+  if getline(begin[1]) =~# '\<deriving\>'
+    let i = begin[1]
+    while i
+      let line = getline(i)
+      if getline(i) =~# '\<data\>'
+        return match(line, '\<data\>')
+      elseif line =~# '^\S'
+        return -1
+      endif
+      let i -= 1
+    endwhile
   endif
+  return match(getline(begin[1]), '^\s*\%(\<where\>\|\<let\>\)\?\s*\zs')
 endfunction
 
 let &cpo = s:save_cpo
