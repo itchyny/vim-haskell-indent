@@ -2,7 +2,7 @@
 " Filename: indent/haskell.vim
 " Author: itchyny
 " License: MIT License
-" Last Change: 2015/06/29 08:29:23.
+" Last Change: 2015/06/30 08:29:39.
 " =============================================================================
 
 if exists('b:did_indent')
@@ -262,7 +262,7 @@ function! s:unindent_after_parenthesis(line, column) abort
   endif
   let pos = getpos(v:lnum)
   let view = winsaveview()
-  execute 'normal! ' a:line . 'gg' . a:column . '|'
+  execute 'normal! ' a:line . 'gg' . (a:column + 1)  . '|'
   let end = getpos('.')
   normal! %
   let begin = getpos('.')
@@ -279,6 +279,8 @@ function! s:unindent_after_parenthesis(line, column) abort
       endif
       let i -= 1
     endwhile
+  elseif getline(begin[1]) =~# '^\s*='
+    return match(getline(prevnonblank(begin[1] - 1)), '^\s*\%(\<where\>\|\<let\>\)\?\s*\zs')
   endif
   return match(getline(begin[1]), '^\s*\%(\<where\>\|\<let\>\)\?\s*\zs')
 endfunction
