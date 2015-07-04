@@ -2,7 +2,7 @@
 " Filename: indent/haskell.vim
 " Author: itchyny
 " License: MIT License
-" Last Change: 2015/07/04 21:07:32.
+" Last Change: 2015/07/04 21:12:12.
 " =============================================================================
 
 if exists('b:did_indent')
@@ -43,11 +43,11 @@ function! GetHaskellIndent() abort
 
   " in
   if line =~# '\<in\>'
-    return s:indent('\<in\>', '^.*\<let\>\s*\zs', 0)
+    return s:indent('^\s*\<in\>', '^.*\<let\>\s*\zs', 0, -1)
   endif
 
   " |
-  if line =~# '|\s*$'
+  if line =~# '|'
     return s:indent_bar()
   endif
 
@@ -74,7 +74,9 @@ function! GetHaskellIndent() abort
   endif
 
   if nonblankline =~# '^\s*}\?[^()\[\]{}]*[(\[{]\%([^()\[\]{}]*\|([^()\[\]{}]*)\|\[[^()\[\]{}]*\]\)*[-+/*\$&<>,]\?\s*$'
-    if nonblankline =~# '[-+/*\$&<>,]\s*$'
+    if nonblankline =~# '[(\[{]\s*$'
+      return match(nonblankline, '\S') + &shiftwidth
+    elseif nonblankline =~# '[-+/*\$&<>,]\s*$'
       return match(nonblankline, '^\s*}\?[^()\[\]{}]*[(\[{]\s*\zs')
     else
       return match(nonblankline, '^\s*}\?[^()\[\]{}]*\zs[(\[{]')
@@ -189,7 +191,7 @@ endfunction
 
 " |
 function! s:indent_bar() abort
-  if getline(v:lnum) =~# '^\s*|\s*$'
+  if getline(v:lnum) =~# '^\s*|'
     let i = prevnonblank(v:lnum - 1)
     while i > 0
       let line = getline(i)
@@ -198,7 +200,7 @@ function! s:indent_bar() abort
       elseif line =~# '\<data\>.*='
         return match(line, '^.*\<data\>.*\zs=')
       elseif line =~# '^\S'
-        return -1
+        return &shiftwidth
       endif
       let i -= 1
     endwhile
