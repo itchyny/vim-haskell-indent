@@ -2,7 +2,7 @@
 " Filename: indent/haskell.vim
 " Author: itchyny
 " License: MIT License
-" Last Change: 2015/07/04 20:51:03.
+" Last Change: 2015/07/04 21:07:32.
 " =============================================================================
 
 if exists('b:did_indent')
@@ -22,7 +22,13 @@ function! GetHaskellIndent() abort
   let line = getline(v:lnum)
 
   if line =~# '^\s*[{-]-'
-    return line =~# '^\s*\%(-- |\|{-\)' ? 0 : indent(prevnonblank(v:lnum - 1))
+    if prevnonblank(v:lnum - 1) =~# '^\s*[{-]-'
+      return indent(prevnonblank(v:lnum - 1))
+    elseif prevnonblank(v:lnum - 1) =~# '\<module\|class\|instance\>'
+      return indent(prevnonblank(v:lnum - 1)) + &shiftwidth
+    else
+      return 0
+    endif
   endif
 
   " where
