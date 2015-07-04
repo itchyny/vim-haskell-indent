@@ -2,7 +2,7 @@
 " Filename: indent/haskell.vim
 " Author: itchyny
 " License: MIT License
-" Last Change: 2015/07/05 00:20:32.
+" Last Change: 2015/07/05 00:22:43.
 " =============================================================================
 
 if exists('b:did_indent')
@@ -219,6 +219,8 @@ function! s:indent_comment() abort
         return indent + &shiftwidth
       elseif line =~# '^\s*(\s*$'
         return previndent ? previndent : indent + &shiftwidth
+      elseif line =~# '^\S'
+        return 0
       endif
       let previndent = indent
       let i -= 1
