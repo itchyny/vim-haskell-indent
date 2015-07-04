@@ -2,7 +2,7 @@
 " Filename: indent/haskell.vim
 " Author: itchyny
 " License: MIT License
-" Last Change: 2015/07/05 00:06:37.
+" Last Change: 2015/07/05 00:13:56.
 " =============================================================================
 
 if exists('b:did_indent')
@@ -21,16 +21,8 @@ function! GetHaskellIndent() abort
 
   let line = getline(v:lnum)
 
-  if line =~# '^\s*[{-]-'
-    if getline(prevnonblank(v:lnum - 1)) =~# '^\s*[{-]-'
-      return indent(prevnonblank(v:lnum - 1))
-    elseif getline(prevnonblank(v:lnum - 1)) =~# '\<module\|class\|instance\>\|^\s*where\s*$'
-      return indent(prevnonblank(v:lnum - 1)) + &shiftwidth
-    elseif getline(prevnonblank(v:lnum - 1)) =~# '^\s*(\s*$'
-      return indent(prevnonblank(v:lnum - 1)) + &shiftwidth
-    else
-      return 0
-    endif
+  if line =~# '^\s*[-{]-'
+    return s:indent_comment()
   endif
 
   " where
@@ -201,6 +193,28 @@ function! s:indent(linepattern, pattern, diff, ...) abort
     endwhile
   endif
   return -1
+endfunction
+
+" comment
+function! s:indent_comment() abort
+  if getline(v:lnum) =~# '^\s*[-{]-'
+    let i = prevnonblank(v:lnum - 1)
+    let previndent = 0
+    while i > 0
+      let line = getline(i)
+      let indent = indent(i)
+      if line =~# '^\s*[-{]-'
+        return indent
+      elseif line =~# '\<module\|class\|instance\>'
+        return indent + &shiftwidth
+      elseif line =~# '^\s*(\s*$'
+        return previndent ? previndent : indent + &shiftwidth
+      endif
+      let previndent = indent
+      let i -= 1
+    endwhile
+  endif
+  return 0
 endfunction
 
 " |
