@@ -1,5 +1,5 @@
 module X ( foo,
            bar,
            baz
-           ) where
+  ) where
 foo = 10
