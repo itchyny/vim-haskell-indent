@@ -2,7 +2,7 @@
 " Filename: indent/haskell.vim
 " Author: itchyny
 " License: MIT License
-" Last Change: 2015/07/05 00:52:47.
+" Last Change: 2015/07/05 01:01:54.
 " =============================================================================
 
 if exists('b:did_indent')
@@ -115,8 +115,8 @@ function! GetHaskellIndent() abort
     return s:after_where()
   endif
 
-  if nonblankline =~# '\<module\>'
-    return match(nonblankline, '\<module\>') + &shiftwidth
+  if nonblankline =~# '\<module\>' && nonblankline !~# ',\s*$'
+    return &shiftwidth
   endif
 
   if line =~# '\<if\>'
@@ -220,7 +220,7 @@ function! s:indent_comment() abort
       let indent = indent(i)
       if line =~# '^\s*[-{]-'
         return indent
-      elseif line =~# '\<module\|class\|instance\>'
+      elseif line =~# '\<module\|class\|instance\>' && line !~# ',\s*$'
         return indent + &shiftwidth
       elseif line =~# '^\s*(\s*$'
         return previndent ? previndent : indent + &shiftwidth
@@ -370,7 +370,7 @@ function! s:after_where() abort
     call setpos('.', pos)
     call winrestview(view)
     if getline(begin[1]) =~# '\<module\|class\|instance\>'
-      return match(getline(begin[1]), '\<module\|class\|instance\>')
+      return 0
     endif
   endif
   if line =~# '\<where\>\s*$'
@@ -378,7 +378,7 @@ function! s:after_where() abort
     while i > 0
       let line = getline(i)
       if line =~# '\<module\>'
-        return match(line, '\<module\>')
+        return 0
       elseif line =~# '\<class\|instance\>'
         return match(line, '\<class\|instance\>') + &shiftwidth
       elseif line =~# '^\S' && line !~# '^--'
