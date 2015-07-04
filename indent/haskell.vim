@@ -2,7 +2,7 @@
 " Filename: indent/haskell.vim
 " Author: itchyny
 " License: MIT License
-" Last Change: 2015/07/04 20:31:48.
+" Last Change: 2015/07/04 20:36:11.
 " =============================================================================
 
 if exists('b:did_indent')
@@ -83,41 +83,8 @@ function! GetHaskellIndent() abort
     return s:indent('', '^.*\zs\<data\>.*=', 0)
   endif
 
-  if nonblankline =~# '^.*[^|]|[^|]' && nonblankline !~# '[.*|.*<-'
-    if line =~# '^\s*$'
-      if prevnonblank(v:lnum - 1) < v:lnum - 2
-        return 0
-      endif
-      let i = v:lnum - 1
-      let where_clause = 0
-      while i
-        let line = getline(i)
-        if line =~# '^\S'
-          return 0
-        endif
-        if where_clause && line !~# '^\s*$' && line !~# '^\s*|[^|]'
-          return match(line, '^\s*\%(\<where\>\)\?\s*\zs')
-        endif
-        if line =~# '\<where\>'
-          let where_clause = 1
-        endif
-        let i -= 1
-      endwhile
-    endif
-    if nonblankline =~# '[^|]|\s*\%(otherwise\|True\|0\s*<\s*1\|1\s*>\s*0\)'
-      let i = prevnonblank(v:lnum - 1)
-      while i
-        let line = getline(i)
-        if line !~# '^\s*$' && line !~# '^\s*|'
-          return match(line, '^\s*\%(\<where\>\)\?\s*\zs')
-        endif
-        let i -= 1
-      endwhile
-    elseif nonblankline =~# '^\s*\<data\>.*='
-      return match(line, '^.*\<data\>.*\zs=')
-    else
-      return match(line, '^.*[^|]\zs|[^|]')
-    endif
+  if nonblankline =~# '^.*[^|]|[^|].*='
+    return s:after_guard()
   endif
 
   if nonblankline =~# '[)}\]]\s*$'
@@ -221,7 +188,7 @@ function! s:indent_bar() abort
     while i > 0
       let line = getline(i)
       if line =~# '^\s*\%(\<where\>\)\?.*[^|]|[^|].*='
-        return match(line, '^\s*\%(\<where\>\)\?.*\zs|')
+        return match(line, '^\s*\%(\<where\>\)\?.*\zs|.*=')
       elseif line =~# '\<data\>.*='
         return match(line, '^.*\<data\>.*\zs=')
       elseif line =~# '^\S'
@@ -231,6 +198,46 @@ function! s:indent_bar() abort
     endwhile
   endif
   return -1
+endfunction
+
+" guard
+function! s:after_guard() abort
+  let nonblankline = getline(prevnonblank(v:lnum - 1))
+  let line = getline(v:lnum - 1)
+  if line =~# '^\s*$'
+    if prevnonblank(v:lnum - 1) < v:lnum - 2
+      return 0
+    endif
+    let i = v:lnum - 1
+    let where_clause = 0
+    while i
+      let line = getline(i)
+      if line =~# '^\S'
+        return 0
+      endif
+      if where_clause && line !~# '^\s*$' && line !~# '^\s*|[^|]'
+        return match(line, '^\s*\%(\<where\>\)\?\s*\zs')
+      endif
+      if line =~# '\<where\>'
+        let where_clause = 1
+      endif
+      let i -= 1
+    endwhile
+  endif
+  if nonblankline =~# '[^|]|\s*\%(otherwise\|True\|0\s*<\s*1\|1\s*>\s*0\)'
+    let i = prevnonblank(v:lnum - 1)
+    while i
+      let line = getline(i)
+      if line !~# '^\s*$' && line !~# '^\s*|'
+        return match(line, '^\s*\%(\<where\>\)\?\s*\zs')
+      endif
+      let i -= 1
+    endwhile
+  elseif nonblankline =~# '^\s*\<data\>.*='
+    return match(line, '^.*\<data\>.*\zs=')
+  else
+    return match(line, '^.*[^|]\zs|[^|].*=')
+  endif
 endfunction
 
 " =
