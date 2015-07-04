@@ -2,7 +2,7 @@
 " Filename: indent/haskell.vim
 " Author: itchyny
 " License: MIT License
-" Last Change: 2015/07/04 22:50:53.
+" Last Change: 2015/07/04 23:02:11.
 " =============================================================================
 
 if exists('b:did_indent')
@@ -12,7 +12,7 @@ endif
 let b:did_indent = 1
 
 setlocal indentexpr=GetHaskellIndent()
-setlocal indentkeys=!^F,o,O,0=wher,=deri,=in,0<bar>,0==,0}
+setlocal indentkeys=!^F,o,O,=wher,=deri,=in,0<bar>,0==,0}
 
 let s:save_cpo = &cpo
 set cpo&vim
@@ -32,8 +32,11 @@ function! GetHaskellIndent() abort
   endif
 
   " where
-  if line =~# '^\s*\<wher\%[e]\>'
-    return s:indent('^\s*\<wher\%[e]\>', '^\s*\%(\<where\>\)\?\s*\zs\h.*=\|^\s*[^|]', &shiftwidth)
+  if line =~# '\<wher\%[e]\>'
+    let i = s:indent_where()
+    if i >= 0
+      return i
+    endif
   endif
 
   " deriving
@@ -302,6 +305,26 @@ function! s:unindent_after_parenthesis(line, column) abort
     return match(getline(prevnonblank(begin[1] - 1)), '^\s*\%(\<where\>\|\<let\>\)\?\s*\zs')
   endif
   return match(getline(begin[1]), '^\s*\%(\<where\>\|\<let\>\)\?\s*\zs')
+endfunction
+
+" where
+function! s:indent_where() abort
+  if getline(v:lnum) =~# '^\s*\<wher\%[e]\>'
+    return s:indent('^\s*\<wher\%[e]\>', '^\s*\%(\<where\>\)\?\s*\zs\h.*=\|^\s*[^|]', &shiftwidth)
+  elseif getline(v:lnum) =~# '^\s*)\s*\<wher\%[e]\>'
+    let pos = getpos('.')
+    let view = winsaveview()
+    normal! F)%
+    let begin = getpos('.')
+    call setpos('.', pos)
+    call winrestview(view)
+    if getline(begin[1]) =~# '\<module\|class\|instance\>'
+      return indent(begin[1]) + &shiftwidth
+    elseif getline(prevnonblank(begin[1] - 1)) =~# '\<module\|class\|instance\>'
+      return indent(prevnonblank(begin[1] - 1)) + &shiftwidth
+    endif
+  endif
+  return -1
 endfunction
 
 " where
