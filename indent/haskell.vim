@@ -2,7 +2,7 @@
 " Filename: indent/haskell.vim
 " Author: itchyny
 " License: MIT License
-" Last Change: 2015/07/04 21:30:02.
+" Last Change: 2015/07/04 21:33:53.
 " =============================================================================
 
 if exists('b:did_indent')
@@ -232,7 +232,7 @@ function! s:after_guard() abort
       let i -= 1
     endwhile
   endif
-  if nonblankline =~# '[^|]|\s*\%(otherwise\|True\|0\s*<\s*1\|1\s*>\s*0\)'
+  if nonblankline =~# '[^|]|\s*\%(otherwise\|True\|0\s*<\s*1\|1\s*>\s*0\)' || getline(v:lnum) =~# '^\s*\S'
     let i = prevnonblank(v:lnum - 1)
     while i
       let line = getline(i)
