@@ -2,7 +2,7 @@
 " Filename: indent/haskell.vim
 " Author: itchyny
 " License: MIT License
-" Last Change: 2015/07/04 23:25:03.
+" Last Change: 2015/07/05 00:06:37.
 " =============================================================================
 
 if exists('b:did_indent')
@@ -287,7 +287,6 @@ function! s:unindent_after_parenthesis(line, column) abort
   let pos = getpos('.')
   let view = winsaveview()
   execute 'normal! ' a:line . 'gg' . (a:column + 1)  . '|'
-  let end = getpos('.')
   normal! %
   let begin = getpos('.')
   call setpos('.', pos)
