@@ -2,7 +2,7 @@
 " Filename: indent/haskell.vim
 " Author: itchyny
 " License: MIT License
-" Last Change: 2015/07/05 00:13:56.
+" Last Change: 2015/07/05 00:20:32.
 " =============================================================================
 
 if exists('b:did_indent')
@@ -12,7 +12,7 @@ endif
 let b:did_indent = 1
 
 setlocal indentexpr=GetHaskellIndent()
-setlocal indentkeys=!^F,o,O,=wher,=deri,=in,0<bar>,0==,0}
+setlocal indentkeys=!^F,o,O,=wher,=deri,=in,0<bar>,0==,0},0#
 
 let s:save_cpo = &cpo
 set cpo&vim
@@ -20,6 +20,11 @@ set cpo&vim
 function! GetHaskellIndent() abort
 
   let line = getline(v:lnum)
+
+  " #if, #else, #endif, #include
+  if line =~# '^\s*#'
+    return 0
+  endif
 
   if line =~# '^\s*[-{]-'
     return s:indent_comment()
@@ -65,6 +70,11 @@ function! GetHaskellIndent() abort
   let nonblankline = getline(prevnonblank(v:lnum - 1))
 
   let line = getline(v:lnum - 1)
+
+  " #if, #else, #endif, #include
+  if nonblankline =~# '^\s*#'
+    return 0
+  endif
 
   if nonblankline =~# '^\s*--'
     return match(nonblankline, '\S')
