@@ -12,7 +12,7 @@ endif
 let b:did_indent = 1
 
 setlocal indentexpr=GetHaskellIndent()
-setlocal indentkeys=!^F,o,O,=wher,=deri,=in,0=clas,0=inst,0<bar>,0==,0},0#
+setlocal indentkeys=!^F,o,O,=wher,=deri,=in,0=clas,0=inst,0=data,0<bar>,0==,0},0#
 
 let s:save_cpo = &cpo
 set cpo&vim
@@ -44,7 +44,7 @@ function! GetHaskellIndent() abort
   endif
 
   " class, instance
-  if line =~# '\<clas\%[s]\|inst\%[ance]\>'
+  if line =~# '\<clas\%[s]\|inst\%[ance]\|data\>'
     return 0
   endif
 
