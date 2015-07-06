@@ -2,7 +2,7 @@
 " Filename: indent/haskell.vim
 " Author: itchyny
 " License: MIT License
-" Last Change: 2015/07/05 05:57:42.
+" Last Change: 2015/07/05 21:59:56.
 " =============================================================================
 
 if exists('b:did_indent')
@@ -161,13 +161,15 @@ function! GetHaskellIndent() abort
     return s:indent('', nonblankline =~# ',\s*$' ? '\S' : '{\s*\<\w\+\s*::', 0, match(nonblankline, '\S'))
   endif
 
-  if prevnonblank(v:lnum - 1) < v:lnum - 1
+  if prevnonblank(v:lnum - 1) < v:lnum - 2
+    return 0
+  elseif prevnonblank(v:lnum - 1) < v:lnum - 1
     let i = prevnonblank(v:lnum - 1)
     let where_clause = 0
     let indent = indent(prevnonblank(v:lnum - 1))
     while i
       let line = getline(i)
-      if line =~# '\<where\>'
+      if line =~# '\<where\>' && indent(i) <= indent
         let where_clause += 1
         if where_clause == v:lnum - prevnonblank(v:lnum - 1)
           return match(line, '^.*\<where\>\s*\zs')
@@ -342,7 +344,16 @@ endfunction
 " where
 function! s:indent_where() abort
   if getline(v:lnum) =~# '^\s*\<wher\%[e]\>'
-    return s:indent('^\s*\<wher\%[e]\>', '^\s*\%(\<where\>\)\?\s*\zs\h.*=\|^\s*[^| ]', &shiftwidth)
+    let i = prevnonblank(v:lnum - 1)
+    while i > 0
+      let line = getline(i)
+      if line =~# '^\s*\%(\<where\>\)\?\s*\zs\h.*=\|^\s*[^| ]'
+        return match(line, '^\s*\%(\<where\>\)\?\s*\zs\h.*=\|^\s*[^| ]') + &shiftwidth
+      elseif line =~# '^\S'
+        return -1
+      endif
+      let i -= 1
+    endwhile
   elseif getline(v:lnum) =~# '^\s*)\s*\<wher\%[e]\>'
     let pos = getpos('.')
     let view = winsaveview()
@@ -387,6 +398,22 @@ function! s:after_where() abort
       let i -= 1
     endwhile
   elseif line =~# '^\s*\<where\>'
+    if prevnonblank(v:lnum - 1) < v:lnum - 2
+      return 0
+    elseif prevnonblank(v:lnum - 1) < v:lnum - 1
+      let i = prevnonblank(v:lnum - 1) - 1
+      let indent = indent(prevnonblank(v:lnum - 1))
+      while i
+        let line = getline(i)
+        if line =~# '^\S'
+          return 0
+        elseif indent(i) < indent
+          return match(line, '^\s*\%(\<where\>\)\?\s*\zs')
+        endif
+        let i -= 1
+      endwhile
+      return 0
+    endif
     return match(line, '\<where\>\s*\zs')
   else
     return indent(prevnonblank(v:lnum - 1))
