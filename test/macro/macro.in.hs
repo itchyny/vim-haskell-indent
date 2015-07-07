@@ -7,6 +7,7 @@ import Data.Traversable (Traversable(traverse))
 #endif
 #if __GLASGOW_HASKELL__
 import GHC.Exts ( build )
+#endif
 #if __GLASGOW_HASKELL__ >= 708
 import qualified GHC.Exts as GHCExts
 #endif
