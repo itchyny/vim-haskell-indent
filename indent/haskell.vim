@@ -2,7 +2,7 @@
 " Filename: indent/haskell.vim
 " Author: itchyny
 " License: MIT License
-" Last Change: 2015/07/07 21:11:11.
+" Last Change: 2015/07/07 21:17:50.
 " =============================================================================
 
 if exists('b:did_indent')
@@ -86,13 +86,13 @@ function! GetHaskellIndent() abort
     return match(nonblankline, '\S')
   endif
 
-  if nonblankline =~# '^\s*}\?[^()\[\]{}]*[(\[{]\%([^()\[\]{}]*\|([^()\[\]{}]*)\|\[[^()\[\]{}]*\]\)*[-+/*\$&<>,]\?\s*$'
-    if nonblankline =~# '[(\[{]\s*$'
+  if nonblankline =~# '^\s*}\?[^()\[\]{}]*[([{]\%([^()\[\]{}]*\|([^()\[\]{}]*)\|\[[^()\[\]{}]*\]\)*[-+/*\$&<>,]\?\s*$'
+    if nonblankline =~# '[([{]\s*$'
       return match(nonblankline, '\S') + &shiftwidth
     elseif nonblankline =~# '[-+/*\$&<>,]\s*$'
-      return match(nonblankline, '^\s*}\?[^()\[\]{}]*[(\[{]\s*\zs')
+      return match(nonblankline, '^\s*}\?[^()\[\]{}]*[([{]\s*\zs')
     else
-      return match(nonblankline, '^\s*}\?[^()\[\]{}]*\zs[(\[{]')
+      return match(nonblankline, '^\s*}\?[^()\[\]{}]*\zs[([{]')
     endif
   endif
 
@@ -120,7 +120,7 @@ function! GetHaskellIndent() abort
     return &shiftwidth
   endif
 
-  if line =~# '\<if\>'
+  if line =~# '\<if\>' && line !~# '^\s*#'
     if line =~# '\<then\>'
       return match(line, '.*\zs\<then\>')
     else
@@ -177,7 +177,7 @@ function! GetHaskellIndent() abort
         endif
       endif
       if 0 <= indent(i) && indent(i) < indent && line !~# '\<where\>\|^\s*|\|^$'
-        return indent(i)
+        return line =~# '^\s*[([{]' ? indent : indent(i)
       endif
       if line =~# '^\s*\<class\|instance\>' && getline(v:lnum) !~# '\<class\|instance\>'
         return match(line, '^\s*\<class\|instance\>') + &shiftwidth
