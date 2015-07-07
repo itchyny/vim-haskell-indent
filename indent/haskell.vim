@@ -2,7 +2,7 @@
 " Filename: indent/haskell.vim
 " Author: itchyny
 " License: MIT License
-" Last Change: 2015/07/05 21:59:56.
+" Last Change: 2015/07/07 20:30:25.
 " =============================================================================
 
 if exists('b:did_indent')
@@ -26,7 +26,8 @@ function! GetHaskellIndent() abort
     return 0
   endif
 
-  if line =~# '^\s*[-{]-'
+  " comment
+  if s:in_comment()
     return s:indent_comment()
   endif
 
@@ -212,8 +213,23 @@ function! s:indent(linepattern, pattern, diff, ...) abort
   return -1
 endfunction
 
+" the cursor is in comment
+function! s:in_comment() abort
+  if getline(v:lnum) =~# '^\s*--'
+    return 1
+  endif
+  let start = searchpos('\%(--.*\)\@<!{-', 'bcnW')
+  let pos = getpos('.')
+  let end = searchpos('\%(--.*\)\@<!-}', 'bcnW')
+  return start != [0, 0] && (start[0] < pos[1] || start[0] == pos[1] && start[1] <= pos[2])
+        \ && (end == [0, 0] || end[0] < start[0] || end[0] == start[0] && end[1] < start[1])
+endfunction
+
 " comment
 function! s:indent_comment() abort
+  if getline(v:lnum) =~# '^\s*\%({- |\|-- -\{10,\}\)'
+    return 0
+  endif
   if getline(v:lnum) =~# '^\s*[-{]-'
     let i = prevnonblank(v:lnum - 1)
     let previndent = 0
@@ -233,7 +249,18 @@ function! s:indent_comment() abort
       let i -= 1
     endwhile
   endif
-  return 0
+  let listpattern = '^\s*\%(\* @\|[a-z]) \|>\s\+\)'
+  if getline(v:lnum) =~# listpattern
+    if getline(prevnonblank(v:lnum - 1)) =~# listpattern
+      return indent(prevnonblank(v:lnum - 1))
+    else
+      return indent(prevnonblank(v:lnum - 1)) + &shiftwidth
+    endif
+  endif
+  if getline(v:lnum) !~# '^\s*$' && getline(prevnonblank(v:lnum - 1)) =~# listpattern
+    return indent(prevnonblank(v:lnum - 1)) - &shiftwidth
+  endif
+  return getline(v:lnum) =~# '^\s*[-{]-' ? 0 : indent(prevnonblank(v:lnum - 1))
 endfunction
 
 " |
