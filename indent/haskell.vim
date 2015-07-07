@@ -2,7 +2,7 @@
 " Filename: indent/haskell.vim
 " Author: itchyny
 " License: MIT License
-" Last Change: 2015/07/08 00:13:54.
+" Last Change: 2015/07/08 07:20:28.
 " =============================================================================
 
 if exists('b:did_indent')
@@ -284,15 +284,19 @@ endfunction
 function! s:indent_bar() abort
   if getline(v:lnum) =~# '^\s*|'
     let i = s:prevnonblank(v:lnum - 1)
+    let indent = indent(i)
     while i > 0
       let line = getline(i)
       if line =~# '^\s*\%(\<where\>\)\?.*[^|]|[^|].*='
-        return match(line, '^\s*\%(\<where\>\)\?.*\zs|.*=')
+        return match(line, '^\s*\%(\<where\>\)\?.*[^|]\zs|[^|].*=')
       elseif line =~# '\<data\>.*='
         return match(line, '^.*\<data\>.*\zs=')
+      elseif line =~# '^\s*\<where\>\s*\%(--.*\)\?$' && indent(i) < indent
+        return indent + &shiftwidth
       elseif line =~# '^\S'
         return &shiftwidth
       endif
+      let indent = indent(i)
       let i -= 1
     endwhile
   endif
