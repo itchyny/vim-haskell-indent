@@ -2,7 +2,7 @@
 " Filename: indent/haskell.vim
 " Author: itchyny
 " License: MIT License
-" Last Change: 2015/07/08 07:20:28.
+" Last Change: 2015/07/08 08:47:44.
 " =============================================================================
 
 if exists('b:did_indent')
@@ -28,7 +28,10 @@ function! GetHaskellIndent() abort
 
   " comment
   if s:in_comment()
-    return s:indent_comment()
+    let i = s:indent_comment()
+    if i >= 0
+      return i
+    endif
   endif
 
   " where
@@ -65,7 +68,7 @@ function! GetHaskellIndent() abort
   endif
 
   " }
-  if line =~# '}$'
+  if line =~# '^\s*}$'
     return s:indent_brace()
   endif
 
@@ -159,6 +162,9 @@ function! GetHaskellIndent() abort
   endif
 
   if nonblankline =~# '^\s*\<data\>.*='
+    if nonblankline =~# '{-#\s*UNPACK\s*#-}' && getline(v:lnum) =~# '^\s*{-#\s*UNPACK\s*#-}'
+      return match(nonblankline, '{-#\s*UNPACK\s*#-}')
+    endif
     return s:indent('', '^.*\<data\>.*\zs=', 0)
   endif
 
@@ -202,7 +208,7 @@ function! s:prevnonblank(lnum) abort
   let i = a:lnum
   while i > 0
     let i = prevnonblank(i)
-    if getline(i) !~# '^\s*#'
+    if getline(i) !~# '^\s*#\s*\w\+'
       return i
     endif
     let i -= 1
@@ -244,6 +250,12 @@ endfunction
 
 " comment
 function! s:indent_comment() abort
+  if getline(s:prevnonblank(v:lnum - 1)) =~# '{-#\s*UNPACK\s*#-}' && getline(v:lnum) =~# '^\s*{-#\s*UNPACK\s*#-}'
+    return match(getline(s:prevnonblank(v:lnum - 1)), '{-#\s*UNPACK\s*#-}')
+  endif
+  if getline(v:lnum) =~# '^\s*{-#\s*INLINE'
+    return -1
+  endif
   if getline(v:lnum) =~# '^\s*\%({- |\|{-#.*#-}\s*\%(--.*\)\?$\|-- -\{10,\}\)'
     return 0
   endif
@@ -277,7 +289,18 @@ function! s:indent_comment() abort
   if getline(v:lnum) !~# '^\s*\%(--.*\)\?$' && getline(s:prevnonblank(v:lnum - 1)) =~# listpattern
     return indent(s:prevnonblank(v:lnum - 1)) - &shiftwidth
   endif
-  return getline(v:lnum) =~# '^\s*[-{]-' ? 0 : indent(s:prevnonblank(v:lnum - 1))
+  if getline(v:lnum) =~# '^\s*[-{]-'
+    return 0
+  endif
+  let line = getline(s:prevnonblank(v:lnum - 1))
+  if line =~# '^\s*{-#\s*\%(\s\+\w\+,\?\)\+'
+    if line =~# ',\s*\%(--.*\)\?$'
+      return match(line, '\zs\<\w\+,')
+    else
+      return match(line, '\w\+\s\+\zs\<\w\+') - &shiftwidth
+    endif
+  endif
+  return indent(s:prevnonblank(v:lnum - 1))
 endfunction
 
 " |
