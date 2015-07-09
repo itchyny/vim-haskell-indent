@@ -2,7 +2,7 @@
 " Filename: indent/haskell.vim
 " Author: itchyny
 " License: MIT License
-" Last Change: 2015/07/08 08:47:44.
+" Last Change: 2015/07/09 22:57:07.
 " =============================================================================
 
 if exists('b:did_indent')
@@ -21,17 +21,17 @@ function! GetHaskellIndent() abort
 
   let line = getline(v:lnum)
 
-  " #if, #else, #endif, #include
-  if line =~# '^\s*#'
-    return 0
-  endif
-
   " comment
   if s:in_comment()
     let i = s:indent_comment()
     if i >= 0
       return i
     endif
+  endif
+
+  " #if, #else, #endif, #include
+  if line =~# '^\s*\%(#$\|#\s*\w\+\)'
+    return 0
   endif
 
   " where
@@ -48,7 +48,7 @@ function! GetHaskellIndent() abort
   endif
 
   " class, instance
-  if line =~# '^\s*\%(\<clas\%[s]\|inst\%[ance]\|data\>\)'
+  if line =~# '^\s*\<\%(clas\%[s]\|inst\%[ance]\|data\)\>'
     return 0
   endif
 
@@ -189,8 +189,8 @@ function! GetHaskellIndent() abort
       if 0 <= indent(i) && indent(i) < indent && line !~# '\<where\>\|^\s*|\|^$'
         return line =~# '^\s*[([{]' ? indent : indent(i)
       endif
-      if line =~# '^\s*\<class\|instance\>' && getline(v:lnum) !~# '\<class\|instance\>'
-        return match(line, '^\s*\<class\|instance\>') + &shiftwidth
+      if line =~# '^\s*\<\%(class\|instance\)\>' && getline(v:lnum) !~# '\<\%(class\|instance\)\>'
+        return match(line, '^\s*\<\%(class\|instance\)\>') + &shiftwidth
       elseif line =~# '^\S'
         return 0
       endif
@@ -253,13 +253,22 @@ function! s:indent_comment() abort
   if getline(s:prevnonblank(v:lnum - 1)) =~# '{-#\s*UNPACK\s*#-}' && getline(v:lnum) =~# '^\s*{-#\s*UNPACK\s*#-}'
     return match(getline(s:prevnonblank(v:lnum - 1)), '{-#\s*UNPACK\s*#-}')
   endif
-  if getline(v:lnum) =~# '^\s*{-#\s*INLINE'
+  if getline(v:lnum) =~# '^\s*{-#\s*\<\%(INLINE\|RULES\)\>'
     return -1
   endif
   if getline(v:lnum) =~# '^\s*\%({- |\|{-#.*#-}\s*\%(--.*\)\?$\|-- -\{10,\}\)'
     return 0
   endif
   if getline(v:lnum) =~# '^\s*[-{]-'
+    let i = v:lnum
+    if getline(i) =~# '^\s*--'
+      while i <= line('$') && (getline(i) =~# '^\s*--' || getline(i) == '')
+        let i += 1
+      endwhile
+      if getline(i) =~# '^\s*\<\%(class\|instance\|data\)\>'
+        return match(getline(i), '^\s*\zs\<\%(class\|instance\|data\)\>')
+      endif
+    endif
     let i = s:prevnonblank(v:lnum - 1)
     let previndent = 0
     while i > 0
@@ -267,7 +276,7 @@ function! s:indent_comment() abort
       let indent = indent(i)
       if line =~# '^\s*[-{]-'
         return indent
-      elseif line =~# '\<module\|class\|instance\>\|^\s*\<where\>\s*\%(--.*\)\?$' && line !~# ',\s*\%(--.*\)\?$'
+      elseif line =~# '\<\%(module\|class\|instance\)\>\|^\s*\<where\>\s*\%(--.*\)\?$' && line !~# ',\s*\%(--.*\)\?$'
         return indent + &shiftwidth
       elseif line =~# '\s*(\s*\%(--.*\)\?$'
         return previndent ? previndent : indent + &shiftwidth
@@ -278,13 +287,26 @@ function! s:indent_comment() abort
       let i -= 1
     endwhile
   endif
-  let listpattern = '^\s*\%(\* @\|[a-z]) \|>\s\+\)'
+  let listpattern = '^\s*\%(\* @\|[a-z])\s\+\|>\s\+\)'
   if getline(v:lnum) =~# listpattern
     if getline(s:prevnonblank(v:lnum - 1)) =~# listpattern
       return indent(s:prevnonblank(v:lnum - 1))
     else
+      if getline(v:lnum) =~# '^\s*[a-z])\s\+'
+        let i = s:prevnonblank(v:lnum - 1)
+        let indent = indent(i)
+        while 0 < i && indent(i) == indent
+          let i -= 1
+        endwhile
+        if 0 < i && getline(i) =~# '^\s*[a-z])\s\+'
+          return indent(i)
+        endif
+      endif
       return indent(s:prevnonblank(v:lnum - 1)) + &shiftwidth
     endif
+  endif
+  if getline(v:lnum - 1) =~# '^\s*[a-z])\s\+'
+    return match(getline(v:lnum - 1), '^\s*[a-z])\s\+\zs')
   endif
   if getline(v:lnum) !~# '^\s*\%(--.*\)\?$' && getline(s:prevnonblank(v:lnum - 1)) =~# listpattern
     return indent(s:prevnonblank(v:lnum - 1)) - &shiftwidth
@@ -299,6 +321,25 @@ function! s:indent_comment() abort
     else
       return match(line, '\w\+\s\+\zs\<\w\+') - &shiftwidth
     endif
+  endif
+  let i = s:prevnonblank(v:lnum - 1)
+  if i < v:lnum - 1
+    let indent = indent(i)
+    while 0 < i && indent(i) == indent
+      let i -= 1
+    endwhile
+    if 0 < i && getline(i) =~# '^\s*[a-z])\s\+'
+      return indent(i) - &shiftwidth
+    endif
+  endif
+  if getline(v:lnum) =~# '^\s*\%(#\?-}\|#$\)'
+    let i = v:lnum - 1
+    while 0 < i
+      if getline(i) =~# '{-'
+        return match(getline(i), '{-')
+      endif
+      let i -= 1
+    endwhile
   endif
   return indent(s:prevnonblank(v:lnum - 1))
 endfunction
