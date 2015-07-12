@@ -2,7 +2,7 @@
 " Filename: indent/haskell.vim
 " Author: itchyny
 " License: MIT License
-" Last Change: 2015/07/12 11:42:23.
+" Last Change: 2015/07/13 01:09:54.
 " =============================================================================
 
 if exists('b:did_indent')
@@ -271,10 +271,10 @@ function! s:indent_comment() abort
         let i -= 1
       endwhile
     endif
-  elseif getline(v:lnum) =~# '^\s*{-#\s*\<\%(INLINE\|RULES\)\>'
-    return -1
   endif
-  if getline(v:lnum) =~# '^\s*\%([-{]- |\|{-#.*#-}\s*\%(--.*\)\?$\|-- -\{10,\}\)'
+  if getline(v:lnum) =~# '^\s*{-#\s*\<\%(INLINE\|RULES\)\>'
+    return -1
+  elseif getline(v:lnum) =~# '^\s*\%({- |\|{-#.*#-}\s*\%(--.*\)\?$\|-- -\{10,\}\)'
     return 0
   endif
   if getline(v:lnum) =~# '^\s*[-{]-'
@@ -294,7 +294,7 @@ function! s:indent_comment() abort
       let indent = indent(i)
       if line =~# '^\s*[-{]-'
         return indent
-      elseif line =~# '\<\%(module\|class\|instance\)\>\|^\s*\<where\>\s*\%(--.*\)\?$' && line !~# ',\s*\%(--.*\)\?$'
+      elseif line =~# '^\s*\<\%(module\|class\|instance\)\>\|^\s*\<where\>\s*\%(--.*\)\?$' && line !~# ',\s*\%(--.*\)\?$' && line !~# '^\s\+\<module\>'
         return indent + &shiftwidth
       elseif line =~# '\s*(\s*\%(--.*\)\?$'
         return previndent ? previndent : indent + &shiftwidth
@@ -379,7 +379,7 @@ function! s:indent_bar() abort
         return &shiftwidth
       endif
       let indent = indent(i)
-      let i -= 1
+      let i = s:prevnonblank(i - 1)
     endwhile
   endif
   return -1
