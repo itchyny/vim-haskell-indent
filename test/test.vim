@@ -1,8 +1,9 @@
 let s:assert = themis#helper('assert')
 
 function! s:before()
-  filetype indent on
+  filetype plugin indent on
   setlocal filetype=haskell
+  setlocal formatoptions-=cro
 endfunction
 
 function! s:before_each()
