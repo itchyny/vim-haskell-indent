@@ -6,7 +6,8 @@ install:
   - git clone --depth=1 https://github.com/vim/vim /tmp/vim
   - (cd /tmp/vim && ./configure --prefix=$HOME/vim && make && make install)
   - git clone --depth=1 https://github.com/thinca/vim-themis /tmp/themis
+  - export PATH=$HOME/vim/bin/:$PATH
 
 script:
   - vim --cmd version --cmd quit
-  - THEMIS_VIM=$HOME/bin/vim /tmp/themis/bin/themis --reporter spec
+  - /tmp/themis/bin/themis --reporter spec
