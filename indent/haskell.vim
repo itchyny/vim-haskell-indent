@@ -2,7 +2,7 @@
 " Filename: indent/haskell.vim
 " Author: itchyny
 " License: MIT License
-" Last Change: 2015/07/12 11:41:21.
+" Last Change: 2015/07/12 11:42:23.
 " =============================================================================
 
 if exists('b:did_indent')
@@ -260,11 +260,21 @@ endfunction
 function! s:indent_comment() abort
   if getline(s:prevnonblank(v:lnum - 1)) =~# '{-#\s*UNPACK\s*#-}' && getline(v:lnum) =~# '^\s*{-#\s*UNPACK\s*#-}'
     return match(getline(s:prevnonblank(v:lnum - 1)), '{-#\s*UNPACK\s*#-}')
-  endif
-  if getline(v:lnum) =~# '^\s*{-#\s*\<\%(INLINE\|RULES\)\>'
+  elseif getline(v:lnum) =~# '^\s*{-#\s*\<RULES\>\s*\%(--.*\)\?$'
+    let name = matchstr(getline(v:lnum + 1), '^\s*"\zs\k\+\ze\%(/\k\+\)*"')
+    if name !=# ''
+      let i = v:lnum - 1
+      while i
+        if getline(i) =~# '^\s*\%(where\s\+\)\?\<' . name . '\>.*='
+          return match(getline(i), '^\s*\%(\<where\>\)\?\s*\zs')
+        endif
+        let i -= 1
+      endwhile
+    endif
+  elseif getline(v:lnum) =~# '^\s*{-#\s*\<\%(INLINE\|RULES\)\>'
     return -1
   endif
-  if getline(v:lnum) =~# '^\s*\%({- |\|{-#.*#-}\s*\%(--.*\)\?$\|-- -\{10,\}\)'
+  if getline(v:lnum) =~# '^\s*\%([-{]- |\|{-#.*#-}\s*\%(--.*\)\?$\|-- -\{10,\}\)'
     return 0
   endif
   if getline(v:lnum) =~# '^\s*[-{]-'
