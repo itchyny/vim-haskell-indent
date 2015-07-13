@@ -2,7 +2,7 @@
 " Filename: indent/haskell.vim
 " Author: itchyny
 " License: MIT License
-" Last Change: 2015/07/14 06:07:18.
+" Last Change: 2015/07/14 06:21:05.
 " =============================================================================
 
 if exists('b:did_indent')
@@ -12,7 +12,7 @@ endif
 let b:did_indent = 1
 
 setlocal indentexpr=GetHaskellIndent()
-setlocal indentkeys=!^F,o,O,=wher,=deri,0=in,0=clas,0=inst,0=data,0=type,0<bar>,0==,0},0#
+setlocal indentkeys=!^F,o,O,=wher,=deri,0=in,0=clas,0=inst,0=data,0=type,0<bar>,0==,0},0),0#
 
 let s:save_cpo = &cpo
 set cpo&vim
@@ -67,9 +67,9 @@ function! GetHaskellIndent() abort
     return s:indent_eq()
   endif
 
-  " }
-  if line =~# '^\s*}$'
-    return s:indent_brace()
+  " }, )
+  if line =~# '^\s*[})]\s*\%(--.*\)\?$'
+    return s:indent_parenthesis()
   endif
 
   if s:prevnonblank(v:lnum - 1) == 0
@@ -430,8 +430,8 @@ function! s:indent_eq() abort
   return match(getline(s:prevnonblank(v:lnum - 1)), '^\s*\%(\<where\>\|\<let\>\)\?\s*\zs') + &shiftwidth
 endfunction
 
-" }
-function! s:indent_brace() abort
+" }, )
+function! s:indent_parenthesis() abort
   let end = getpos('.')
   let view = winsaveview()
   normal! %
