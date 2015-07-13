@@ -2,7 +2,7 @@
 " Filename: indent/haskell.vim
 " Author: itchyny
 " License: MIT License
-" Last Change: 2015/07/13 01:09:54.
+" Last Change: 2015/07/14 06:07:18.
 " =============================================================================
 
 if exists('b:did_indent')
@@ -123,7 +123,7 @@ function! GetHaskellIndent() abort
     return s:after_where()
   endif
 
-  if nonblankline =~# '\<module\>' && nonblankline !~# ',\s*\%(--.*\)\?$'
+  if nonblankline =~# '\<module\>' && nonblankline !~# ',\s*\%(--.*\)\?$' && indent(s:prevnonblank(v:lnum - 1)) < &shiftwidth
     return &shiftwidth
   endif
 
