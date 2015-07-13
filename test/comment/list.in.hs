@@ -1,9 +1,13 @@
 {-
 foo
 bar
+
   a) foo
-b) bar
-<ESC>abaa
+foo
+<ESC>a  b) bar
+bar
+
+baa
 -}
 {-
 foo

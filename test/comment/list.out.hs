@@ -1,8 +1,12 @@
 {-
 foo
 bar
+
   a) foo
+     foo
   b) bar
+     bar
+
 baa
 -}
 {-
