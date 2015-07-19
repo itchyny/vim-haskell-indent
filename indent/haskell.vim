@@ -2,7 +2,7 @@
 " Filename: indent/haskell.vim
 " Author: itchyny
 " License: MIT License
-" Last Change: 2015/07/19 10:19:24.
+" Last Change: 2015/07/20 03:52:01.
 " =============================================================================
 
 if exists('b:did_indent')
@@ -468,6 +468,8 @@ function! s:unindent_after_parenthesis(line, column) abort
     endwhile
   elseif getline(begin[1]) =~# '^\s*='
     return match(getline(s:prevnonblank(begin[1] - 1)), '^\s*\%(\<where\>\|\<let\>\)\?\s*\zs')
+  elseif getline(s:prevnonblank(begin[1] - 1)) =~# '=\s*\%(--.*\)\?$'
+    return match(getline(s:prevnonblank(begin[1] - 1)), '^\s*\%(\<where\>\|\<let\>\)\?\s*\zs')
   endif
   return match(getline(begin[1]), '^\s*\%(\<where\>\|\<let\>\)\?\s*\zs')
 endfunction
@@ -519,16 +521,20 @@ function! s:after_where() abort
     let i = s:prevnonblank(v:lnum - 1)
     while i > 0
       let line = getline(i)
-      if line =~# '\<module\>'
+      if line =~# '^\s*\<module\>'
         return 0
-      elseif line =~# '\<class\|instance\>'
+      elseif line =~# '^\s*\<\%(class\|instance\)\>'
+        if line =~# '\<where\>\s*\%(--.*\)\?$' && i != s:prevnonblank(v:lnum - 1)
+          break
+        endif
         return match(line, '\<class\|instance\>') + &shiftwidth
       elseif line =~# '^\S' && line !~# '^--'
         return match(getline(s:prevnonblank(v:lnum - 1)), '\<where\>') + &shiftwidth
       endif
       let i -= 1
     endwhile
-  elseif line =~# '^\s*\<where\>'
+  endif
+  if line =~# '^\s*\<where\>'
     if s:prevnonblank(v:lnum - 1) < v:lnum - 2
       return 0
     elseif s:prevnonblank(v:lnum - 1) < v:lnum - 1
@@ -546,9 +552,11 @@ function! s:after_where() abort
       return 0
     endif
     return match(line, '\<where\>\s*\zs')
-  else
-    return indent(s:prevnonblank(v:lnum - 1))
   endif
+  if getline(s:prevnonblank(v:lnum - 1)) =~# '^\s*\<where\>\s*\%(--.*\)\?$'
+    return indent(s:prevnonblank(v:lnum - 1)) + &shiftwidth
+  endif
+  return indent(s:prevnonblank(v:lnum - 1))
 endfunction
 
 let &cpo = s:save_cpo
