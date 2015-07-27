@@ -127,8 +127,9 @@ function! GetHaskellIndent() abort
     return &shiftwidth
   endif
 
-  if nonblankline =~# '^\s*\%([^()[\]{}]*\|([^()[\]{}]*)\|\[[^()[\]{}]*\]\)*[-+/*\$&<>=,]\+\s*\%(--.*\)\?$'
-    return indent(s:prevnonblank(v:lnum - 1)) + (nonblankline =~# ',\s*\%(--.*\)\?$' ? 0 : &shiftwidth)
+  if nonblankline =~# '^\s*\%([^()[\]{}]*\|([^()[\]{}]*)\|\[[^()[\]{}]*\]\)*\%([-+/*\$&<>=,]\+\|`\k\+`\)\s*\%(--.*\)\?$'
+    return match(nonblankline, '^\s*\%(\<where\>\|.*\<let\>\)\?\s*\zs') +
+          \ (nonblankline =~# '\<\%(where\|let\)\>\|=\%(--.*\)\?$' ? &shiftwidth : 0)
   endif
 
   if line =~# '\<if\>' && line !~# '^\s*#'
