@@ -9,5 +9,5 @@ install:
   - export PATH=$HOME/vim/bin/:$PATH
 
 script:
-  - vim --cmd version --cmd quit
+  - vim --version
   - /tmp/themis/bin/themis --reporter spec
