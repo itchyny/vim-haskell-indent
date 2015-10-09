@@ -2,7 +2,7 @@
 " Filename: indent/haskell.vim
 " Author: itchyny
 " License: MIT License
-" Last Change: 2015/10/03 00:14:44.
+" Last Change: 2015/10/09 23:23:18.
 " =============================================================================
 
 if exists('b:did_indent')
@@ -115,6 +115,14 @@ function! GetHaskellIndent() abort
     return s:indent('', '^.*\zs\<data\>.*=', 0)
   endif
 
+  if line =~# '\<if\>' && line !~# '^\s*#'
+    if line =~# '\<then\>'
+      return match(line, '.*\zs\<then\>')
+    else
+      return match(line, '.*\<if\>\s*\zs')
+    endif
+  endif
+
   if nonblankline =~# '^.*[^|]|[^|].*='
     return s:after_guard()
   endif
@@ -134,14 +142,6 @@ function! GetHaskellIndent() abort
   if nonblankline =~# '^\s*\%([^()[\]{}]*\|([^()[\]{}]*)\|\[[^()[\]{}]*\]\)*\%([-+/*\$&<>=,]\+\|`\k\+`\)\s*\%(--.*\)\?$'
     return match(nonblankline, '^\s*\%(\<where\>\|.*\<let\>\)\?\s*\zs') +
           \ (nonblankline =~# '\<\%(where\|let\)\>\|=\%(--.*\)\?$' ? &shiftwidth : 0)
-  endif
-
-  if line =~# '\<if\>' && line !~# '^\s*#'
-    if line =~# '\<then\>'
-      return match(line, '.*\zs\<then\>')
-    else
-      return match(line, '.*\<if\>\s*\zs')
-    endif
   endif
 
   if nonblankline =~# '\<else\>'
