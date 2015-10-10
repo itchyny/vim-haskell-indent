@@ -2,7 +2,7 @@
 " Filename: indent/haskell.vim
 " Author: itchyny
 " License: MIT License
-" Last Change: 2015/10/09 23:23:18.
+" Last Change: 2015/10/10 18:50:53.
 " =============================================================================
 
 if exists('b:did_indent')
@@ -123,6 +123,14 @@ function! GetHaskellIndent() abort
     endif
   endif
 
+  if line =~# '\<case\>.*\<of\>.*\%(--.*\)\?$' && line !~# '^\s*#'
+    if line =~# '\<case\>.*\<of\>\s*[[:alnum:](]'
+      return match(line, '\<case\>.*\<of\>\s*\zs\S')
+    else
+      return match(line, '.*\<case\>\s*\zs')
+    endif
+  endif
+
   if nonblankline =~# '^.*[^|]|[^|].*='
     return s:after_guard()
   endif
@@ -153,10 +161,6 @@ function! GetHaskellIndent() abort
       endif
       let i -= 1
     endwhile
-  endif
-
-  if line =~# '\<case\>.*\<of\>\s*\%(--.*\)\?$' && line !~# '^\s*#'
-    return match(line, '.*\<case\>\s*\zs')
   endif
 
   if nonblankline =~# '->' && line =~# '^\s*\%(--.*\)\?$' || nonblankline =~# '^\s*_\s*->'
@@ -289,8 +293,8 @@ function! s:indent_comment() abort
       while i <= line('$') && (getline(i) =~# '^\s*--' || getline(i) == '')
         let i += 1
       endwhile
-      if getline(i) =~# '^\s*\<\%(class\|instance\|data\)\>'
-        return match(getline(i), '^\s*\zs\<\%(class\|instance\|data\)\>')
+      if getline(i) =~# '^\s*\<\%(class\|instance\|data\)\>\|::.*\(->\|-- *\^\)'
+        return match(getline(i), '^\s*\zs\S')
       endif
     endif
     let i = s:prevnonblank(v:lnum - 1)
