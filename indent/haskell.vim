@@ -2,7 +2,7 @@
 " Filename: indent/haskell.vim
 " Author: itchyny
 " License: MIT License
-" Last Change: 2015/10/10 18:50:53.
+" Last Change: 2015/10/19 08:36:11.
 " =============================================================================
 
 if exists('b:did_indent')
@@ -290,7 +290,7 @@ function! s:indent_comment() abort
   if getline(v:lnum) =~# '^\s*[-{]-'
     let i = v:lnum
     if getline(i) =~# '^\s*--'
-      while i <= line('$') && (getline(i) =~# '^\s*--' || getline(i) == '')
+      while i <= line('$') && (getline(i) =~# '^\s*--' || getline(i) ==# '')
         let i += 1
       endwhile
       if getline(i) =~# '^\s*\<\%(class\|instance\|data\)\>\|::.*\(->\|-- *\^\)'
