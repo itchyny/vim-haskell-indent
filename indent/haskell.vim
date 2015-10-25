@@ -2,7 +2,7 @@
 " Filename: indent/haskell.vim
 " Author: itchyny
 " License: MIT License
-" Last Change: 2015/10/19 08:36:11.
+" Last Change: 2015/10/26 08:42:19.
 " =============================================================================
 
 if exists('b:did_indent')
@@ -44,7 +44,7 @@ function! GetHaskellIndent() abort
 
   " deriving
   if line =~# '\<deri\%[ving]\>'
-    return s:indent('\<deri\%[ving]\>', line =~# '}\s*deri\%[ving]\>' ? '^.*\<data\>.*=\s*\zs' : '^.*\<data\>.*\zs=', 0)
+    return s:indent('\<deri\%[ving]\>', line =~# '}\s*deri\%[ving]\>' ? '^.*\<data\>.*=\s*\S\+\s*\zs' : '^.*\<data\>.*\zs=', 0)
   endif
 
   " class, instance
