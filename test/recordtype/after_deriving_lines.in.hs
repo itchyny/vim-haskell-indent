@@ -1,4 +1,4 @@
-data X = { foo :: Int,
+data X = X { foo :: Int,
 bar :: String
 } deriving ( Eq,
 Ord,
