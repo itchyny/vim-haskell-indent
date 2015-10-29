@@ -2,7 +2,7 @@
 " Filename: indent/haskell.vim
 " Author: itchyny
 " License: MIT License
-" Last Change: 2015/10/29 08:43:23.
+" Last Change: 2015/10/29 23:44:50.
 " =============================================================================
 
 if exists('b:did_indent')
@@ -172,7 +172,7 @@ function! GetHaskellIndent() abort
     while i
       let line = getline(i)
       if getline(i) =~# '\<case\>'
-        return match(line, '^\s*\zs')
+        return match(line, '^\s*\%(where\s\+\)\?\zs')
       endif
       let i -= 1
     endwhile
