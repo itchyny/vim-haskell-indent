@@ -1,5 +1,5 @@
 f x y z
-= [ x,
+  = [ x,
 y,
 z ]
 g x = x
