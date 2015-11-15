@@ -2,7 +2,7 @@
 " Filename: indent/haskell.vim
 " Author: itchyny
 " License: MIT License
-" Last Change: 2015/10/31 00:12:39.
+" Last Change: 2015/11/15 22:51:55.
 " =============================================================================
 
 if exists('b:did_indent')
@@ -183,6 +183,10 @@ function! GetHaskellIndent() abort
       return match(nonblankline, '{-#\s*UNPACK\s*#-}')
     endif
     return s:indent('', '^.*\<data\>.*\zs=', 0)
+  endif
+
+  if nonblankline =~# '\<let\>\s\+.*='
+    return s:indent('', '\<let\>\s\+\zs\S', 0)
   endif
 
   if nonblankline =~# '::'
