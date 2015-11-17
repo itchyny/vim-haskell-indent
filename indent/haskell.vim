@@ -2,7 +2,7 @@
 " Filename: indent/haskell.vim
 " Author: itchyny
 " License: MIT License
-" Last Change: 2015/11/15 22:51:55.
+" Last Change: 2015/11/18 01:27:02.
 " =============================================================================
 
 if exists('b:did_indent')
@@ -548,11 +548,11 @@ function! s:after_where() abort
       let line = getline(i)
       if line =~# '^\s*\<module\>'
         return 0
-      elseif line =~# '^\s*\<\%(class\|instance\)\>'
+      elseif line =~# '^\s*\<\%(class\|instance\|data\)\>'
         if line =~# '\<where\>\s*\%(--.*\)\?$' && i != s:prevnonblank(v:lnum - 1)
           break
         endif
-        return match(line, '\<class\|instance\>') + &shiftwidth
+        return match(line, '\<\%(class\|instance\|data\)\>') + &shiftwidth
       elseif line =~# '^\(\S\|\s*\k\+\s*=\)' && line !~# '^--'
         return match(getline(s:prevnonblank(v:lnum - 1)), '\<where\>') + &shiftwidth
       endif
