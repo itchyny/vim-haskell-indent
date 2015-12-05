@@ -28,9 +28,9 @@ function! s:test(path)
             \,'  call s:assert.equals(getline(1, line("$")), readfile(result))'
             \,'  normal! gg=G'
             \,'  call s:assert.equals(getline(1, line("$")), readfile(result))'
-            \,'  %s/\S\zs$/-- XXX/'
+            \,'  %s/\S\zs$/ -- XXX/'
             \,'  normal! ggvG100<gv='
-            \,'  %s/\s*-- XXX$//'
+            \,'  %s/\s* -- XXX$//'
             \,'  call s:assert.equals(getline(1, line("$")), readfile(result))'
             \,'endfunction' ], "\n")
     endfor
