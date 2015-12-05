@@ -1,5 +1,5 @@
-f = let x = 0
-        y = 1
-        in let z = 2
-               u = 3
-               in (x, y, z, u)
+f = do
+  let x = 0
+  let y = 0
+  let z = 0
+  return (x, y, z)
