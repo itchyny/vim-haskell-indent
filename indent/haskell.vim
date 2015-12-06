@@ -2,7 +2,7 @@
 " Filename: indent/haskell.vim
 " Author: itchyny
 " License: MIT License
-" Last Change: 2015/12/07 07:29:32.
+" Last Change: 2015/12/07 07:35:42.
 " =============================================================================
 
 if exists('b:did_indent')
@@ -466,7 +466,6 @@ function! s:indent_parenthesis() abort
   if begin[1] == end[1] - 1
     return begin[2] - 1
   endif
-  echom string([end[1] - 1, indent(end[1] - 1) , begin[2]])
   if indent(end[1] - 1) + 1 < begin[2]
     return match(getline(begin[1]), '^\s*\%(\<where\>\|.*\<let\>\)\?\s*\zs')
   endif
