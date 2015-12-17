@@ -2,7 +2,7 @@
 " Filename: indent/haskell.vim
 " Author: itchyny
 " License: MIT License
-" Last Change: 2015/12/16 08:40:56.
+" Last Change: 2015/12/18 08:58:10.
 " =============================================================================
 
 if exists('b:did_indent')
@@ -12,7 +12,7 @@ endif
 let b:did_indent = 1
 
 setlocal indentexpr=GetHaskellIndent()
-setlocal indentkeys=!^F,o,O,=wher,=deri,0=in,0=clas,0=inst,0=data,0=type,0<bar>,0},0),0#
+setlocal indentkeys=!^F,o,O,=wher,=deri,0=in,0=class,0=instance,0=data,0=type,0<bar>,0},0),0#
 
 let s:save_cpo = &cpo
 set cpo&vim
@@ -51,7 +51,7 @@ function! GetHaskellIndent() abort
   endif
 
   " class, instance
-  if line =~# '^\s*\<\%(clas\%[s]\|inst\%[ance]\|data\|type\)\>'
+  if line =~# '^\s*\<\%(class\|instance\|data\|type\)\>'
     return 0
   endif
 
@@ -527,6 +527,8 @@ function! s:indent_where() abort
     elseif getline(s:prevnonblank(begin[1] - 1)) =~# '\<module\|class\|instance\>'
       return indent(s:prevnonblank(begin[1] - 1)) + &shiftwidth
     endif
+  elseif getline(v:lnum) =~# '^\s*\<\(module\|class\|instance\)\>'
+    return 0
   elseif getline(v:lnum) =~# '\<where\>\s*\(--.*\)\?'
     let i = s:prevnonblank(v:lnum - 1)
     if i > 0
