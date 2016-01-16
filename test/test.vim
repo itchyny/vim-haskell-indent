@@ -7,7 +7,7 @@ function! s:before()
 endfunction
 
 function! s:before_each()
-  normal! gg"_dG
+  % delete _
   setlocal expandtab shiftwidth=2
 endfunction
 
