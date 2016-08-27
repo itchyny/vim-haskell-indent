@@ -130,9 +130,13 @@ function! GetHaskellIndent() abort
 
   if line =~# '\<case\>.*\<of\>.*\%(\s*--.*\)\?$' && line !~# '^\s*#'
     if line =~# '\<case\>.*\<of\>\s*[[:alnum:](]'
-      return match(line, '\<case\>.*\<of\>\s*\zs\S')
+      return exists('g:haskell_indent_disable_case') && g:haskell_indent_disable_case
+      \      ? indent(s:prevnonblank(v:lnum - 1)) + &shiftwidth
+      \      : match(line, '\<case\>.*\<of\>\s*\zs\S')
     else
-      return match(line, '.*\<case\>\s*\zs')
+      return exists('g:haskell_indent_disable_case') && g:haskell_indent_disable_case
+      \      ? indent(s:prevnonblank(v:lnum - 1)) + &shiftwidth
+      \      : match(line, '.*\<case\>\s*\zs')
     endif
   endif
 
