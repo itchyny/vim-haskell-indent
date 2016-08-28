@@ -2,7 +2,7 @@
 " Filename: indent/haskell.vim
 " Author: itchyny
 " License: MIT License
-" Last Change: 2016/08/23 09:07:13.
+" Last Change: 2016/08/28 13:25:14.
 " =============================================================================
 
 if exists('b:did_indent')
@@ -130,13 +130,13 @@ function! GetHaskellIndent() abort
 
   if line =~# '\<case\>.*\<of\>.*\%(\s*--.*\)\?$' && line !~# '^\s*#'
     if line =~# '\<case\>.*\<of\>\s*[[:alnum:](]'
-      return exists('g:haskell_indent_disable_case') && g:haskell_indent_disable_case
-      \      ? indent(s:prevnonblank(v:lnum - 1)) + &shiftwidth
-      \      : match(line, '\<case\>.*\<of\>\s*\zs\S')
+      return get(g:, 'haskell_indent_disable_case', 0)
+            \ ? indent(s:prevnonblank(v:lnum - 1)) + &shiftwidth
+            \ : match(line, '\<case\>.*\<of\>\s*\zs\S')
     else
-      return exists('g:haskell_indent_disable_case') && g:haskell_indent_disable_case
-      \      ? indent(s:prevnonblank(v:lnum - 1)) + &shiftwidth
-      \      : match(line, '.*\<case\>\s*\zs')
+      return get(g:, 'haskell_indent_disable_case', 0)
+            \ ? indent(s:prevnonblank(v:lnum - 1)) + &shiftwidth
+            \ : match(line, '.*\<case\>\s*\zs')
     endif
   endif
 
