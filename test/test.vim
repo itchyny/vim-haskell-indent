@@ -9,6 +9,7 @@ endfunction
 function! s:before_each()
   % delete _
   setlocal expandtab shiftwidth=2
+  let g:haskell_indent_disable_case = 0
 endfunction
 
 function! s:test(path)
