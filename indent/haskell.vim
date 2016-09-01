@@ -2,7 +2,7 @@
 " Filename: indent/haskell.vim
 " Author: itchyny
 " License: MIT License
-" Last Change: 2016/09/01 09:10:50.
+" Last Change: 2016/09/02 08:53:59.
 " =============================================================================
 
 if exists('b:did_indent')
@@ -289,7 +289,7 @@ function! s:in_comment() abort
   endif
   let start = searchpos('\%(--.*\)\@<!{-', 'bcnW')
   let pos = getpos('.')
-  let end = searchpos('\%(--.*\)\@<!-}', 'bcnW')
+  let end = searchpos('-}', 'bcnW')
   return start != [0, 0] && (start[0] < pos[1] || start[0] == pos[1] && start[1] <= pos[2])
         \ && (end == [0, 0] || end[0] < start[0] || end[0] == start[0] && end[1] < start[1])
 endfunction
