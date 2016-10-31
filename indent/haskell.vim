@@ -2,7 +2,7 @@
 " Filename: indent/haskell.vim
 " Author: itchyny
 " License: MIT License
-" Last Change: 2016/10/31 20:51:13.
+" Last Change: 2016/10/31 20:55:04.
 " =============================================================================
 
 if exists('b:did_indent')
@@ -524,6 +524,8 @@ function! s:unindent_after_parenthesis(line, column) abort
     return match(getline(s:prevnonblank(begin[1] - 1)), '^\s*\%(\<where\>\|\<let\>\)\?\s*\zs')
   elseif getline(s:prevnonblank(begin[1] - 1)) =~# '=\%(\s*--.*\)\?$'
     return match(getline(s:prevnonblank(begin[1] - 1)), '^\s*\%(\<where\>\|\<let\>\)\?\s*\zs')
+  elseif getline(s:prevnonblank(begin[1] - 1)) =~# '\<import\>'
+    return 0
   endif
   return match(getline(begin[1]), '^\s*\%(\<where\>\)\?\s*\zs')
 endfunction
@@ -552,10 +554,12 @@ function! s:indent_where() abort
       return indent(begin[1]) + &shiftwidth
     elseif getline(s:prevnonblank(begin[1] - 1)) =~# '\<module\|class\|instance\>'
       return indent(s:prevnonblank(begin[1] - 1)) + &shiftwidth
+    elseif getline(begin[1]) =~# '^\s*(\%(--.*\)\?'
+      return indent(begin[1])
     endif
   elseif getline(v:lnum) =~# '^\s*\<\(module\|class\|instance\)\>'
     return 0
-  elseif getline(v:lnum) =~# '\<where\>\s*\(--.*\)\?'
+  elseif getline(v:lnum) =~# '\<where\>\s*\%(--.*\)\?'
     let i = s:prevnonblank(v:lnum - 1)
     if i > 0
       let line = getline(i)
