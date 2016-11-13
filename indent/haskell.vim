@@ -2,7 +2,7 @@
 " Filename: indent/haskell.vim
 " Author: itchyny
 " License: MIT License
-" Last Change: 2016/10/31 20:55:04.
+" Last Change: 2016/11/13 17:01:38.
 " =============================================================================
 
 if exists('b:did_indent')
@@ -12,7 +12,7 @@ endif
 let b:did_indent = 1
 
 setlocal indentexpr=GetHaskellIndent()
-setlocal indentkeys=!^F,o,O,=wher,=deri,0=in,0=class,0=instance,0=data,0=type,0<bar>,0},0(,0),0#,0,
+setlocal indentkeys=!^F,o,O,=wher,=deri,0=in,0=class,0=instance,0=data,0=type,0<bar>,0},0],0(,0),0#,0,
 
 let s:save_cpo = &cpo
 set cpo&vim
@@ -75,8 +75,8 @@ function! GetHaskellIndent() abort
     return indent(s:prevnonblank(v:lnum - 1)) + &shiftwidth
   endif
 
-  " }, )
-  if line =~# '^\s*[})]\%(\s*--.*\)\?$'
+  " }, ], )
+  if line =~# '^\s*[})\]]'
     return s:indent_parenthesis()
   endif
 
@@ -475,7 +475,7 @@ function! s:indent_eq() abort
   return match(getline(s:prevnonblank(v:lnum - 1)), '^\s*\%(\<where\>\|\<let\>\)\?\s*\zs') + &shiftwidth
 endfunction
 
-" }, )
+" }, ], )
 function! s:indent_parenthesis() abort
   let view = winsaveview()
   execute 'normal! ' v:lnum . 'gg^'
@@ -486,9 +486,6 @@ function! s:indent_parenthesis() abort
   call winrestview(view)
   if begin[1] == end[1]
     return -1
-  endif
-  if begin[1] == end[1] - 1
-    return begin[2] - 1
   endif
   if indent(end[1] - 1) + 1 < begin[2]
     return match(getline(begin[1]), '^\s*\%(\<where\>\|.*\<let\>\)\?\s*\zs')
