@@ -2,7 +2,7 @@
 " Filename: indent/haskell.vim
 " Author: itchyny
 " License: MIT License
-" Last Change: 2016/11/13 17:47:16.
+" Last Change: 2016/11/25 08:21:49.
 " =============================================================================
 
 if exists('b:did_indent')
@@ -12,7 +12,7 @@ endif
 let b:did_indent = 1
 
 setlocal indentexpr=GetHaskellIndent()
-setlocal indentkeys=!^F,o,O,=wher,=deri,0=in,0=class,0=instance,0=data,0=type,0<bar>,0},0],0(,0),0#,0,
+setlocal indentkeys=!^F,o,O,=wher,=deri,0=in,0=class,0=instance,0=data,0=type,0<bar>,0},0],0(,0),0#,0,0==
 
 let s:save_cpo = &cpo
 set cpo&vim
@@ -414,27 +414,29 @@ endfunction
 
 " |
 function! s:indent_bar() abort
-  if getline(v:lnum) =~# '^\s*|'
-    let i = s:prevnonblank(v:lnum - 1)
-    let indent = indent(i)
-    while i > 0
-      let line = getline(i)
-      if line =~# '^\s*\%(\<where\>\)\?.*[^|]|[^|].*='
-        return match(line, '^\s*\%(\<where\>\)\?.*[^|]\zs|[^|].*=')
-      elseif line =~# '\<data\>.*='
-        return match(line, '^.*\<data\>.*\zs=')
-      elseif line =~# '^\s*\<where\>\%(\s*--.*\)\?$' && indent(i) < indent || line =~# '^\S'
-        return indent + &shiftwidth
-      elseif line =~# '^\s*\<where\>\s\+\S'
-        return match(line, '^\s*\<where\>\s\+\zs\S') + &shiftwidth
-      elseif line =~# '[^|]|[^|].*->'
-        return match(line, '[^|]\zs|[^|].*->')
-      endif
-      let indent = indent(i)
-      let i = s:prevnonblank(i - 1)
-    endwhile
+  if getline(v:lnum) !~# '^\s*|'
+    return -1
   endif
-  return -1
+  let i = s:prevnonblank(v:lnum - 1)
+  let indent = indent(i)
+  while i > 0
+    let line = getline(i)
+    if line =~# '^\s*\%(\<where\>\)\?.*[^|]|[^|].*='
+      return match(line, '^\s*\%(\<where\>\)\?.*[^|]\zs|[^|].*=')
+    elseif line =~# '\<data\>.*='
+      return match(line, '^.*\<data\>.*\zs=')
+    elseif line =~# '^\s*\<where\>\%(\s*--.*\)\?$' && indent(i) < indent || line =~# '^\S'
+      return indent + &shiftwidth
+    elseif line =~# '^\s*\<where\>\s\+\S'
+      return match(line, '^\s*\<where\>\s\+\zs\S') + &shiftwidth
+    elseif line =~# '[^|]|[^|].*->'
+      return match(line, '[^|]\zs|[^|].*->')
+    elseif line =~# '^\s*='
+      return match(line, '^\s*\zs=')
+    endif
+    let indent = indent(i)
+    let i = s:prevnonblank(i - 1)
+  endwhile
 endfunction
 
 " guard
