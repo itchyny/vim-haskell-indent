@@ -2,7 +2,7 @@
 " Filename: indent/haskell.vim
 " Author: itchyny
 " License: MIT License
-" Last Change: 2016/11/27 20:29:57.
+" Last Change: 2017/03/23 19:39:56.
 " =============================================================================
 
 if exists('b:did_indent')
@@ -230,19 +230,23 @@ function! GetHaskellIndent() abort
   elseif s:prevnonblank(v:lnum - 1) < v:lnum - 1 && line !~# '^\s*#'
     let i = s:prevnonblank(v:lnum - 1)
     let where_clause = 0
+    let found_where = 0
     let indent = indent(s:prevnonblank(v:lnum - 1))
     while i
       let line = getline(i)
-      if line =~# '\<where\>' && indent(i) <= indent
-        let where_clause += 1
-        if where_clause == v:lnum - s:prevnonblank(v:lnum - 1)
-          return match(line, '^.*\<where\>\s*\zs')
+      if substitute(line, '--.*', '', 'g') =~# '\<where\>'
+        let found_where = 1
+        if indent(i) <= indent
+          let where_clause += 1
+          if where_clause == v:lnum - s:prevnonblank(v:lnum - 1)
+            return match(line, '^.*\<where\>\s*\zs')
+          endif
         endif
       endif
       if 0 <= indent(i) && indent(i) < indent && line !~# '\<where\>\|^\s*|\|^$'
         return line =~# '^\s*[([{]' ? indent : indent(i)
       endif
-      if line =~# '^\s*\<\%(class\|instance\)\>' && getline(v:lnum) !~# '\<\%(class\|instance\)\>'
+      if line =~# '^\s*\<\%(class\|instance\)\>' && found_where
         return match(line, '^\s*\<\%(class\|instance\)\>') + &shiftwidth
       elseif line =~# '^\S'
         return 0
