@@ -2,7 +2,7 @@
 " Filename: indent/haskell.vim
 " Author: itchyny
 " License: MIT License
-" Last Change: 2017/04/01 12:38:35.
+" Last Change: 2017/05/15 01:05:32.
 " =============================================================================
 
 if exists('b:did_indent')
@@ -350,7 +350,7 @@ function! s:indent_comment() abort
       let indent = indent(i)
       if line =~# '^\s*[-{]-'
         return indent
-      elseif line =~# '^\s*\<\%(module\|class\|instance\)\>\|^\s*\<where\>\%(\s*--.*\)\?$' && line !~# ',\%(\s*--.*\)\?$' && line !~# '^\s\+\<module\>'
+      elseif line =~# '^\s*\<\%(class\|instance\)\>\|^\s*\<where\>\%(\s*--.*\)\?$' && line !~# ',\%(\s*--.*\)\?$'
         return indent + &shiftwidth
       elseif line =~# '\s*(\%(\s*--.*\)\?$'
         return previndent ? previndent : indent + &shiftwidth
