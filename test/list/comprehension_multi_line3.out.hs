@@ -3,8 +3,7 @@ z = (x, y)
               | n <- ns,
                 odd n,
                 isPrime n ]
-        y = [ n * n
-              | n <- [1..],
-                even n,
-                let z = n,
-                isPrime (z `div` 2) ]
+        y = [ n * n | n <- [1..],
+                      even n,
+                      let z = n,
+                      isPrime (z `div` 2) ]
