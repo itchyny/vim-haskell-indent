@@ -6,4 +6,5 @@ isPrime n ]
 y = [ n * n
 | n <- [1..],
 even n,
-isPrime (n `div` 2) ]
+let z = n,
+isPrime (z `div` 2) ]
