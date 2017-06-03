@@ -2,7 +2,7 @@
 " Filename: indent/haskell.vim
 " Author: itchyny
 " License: MIT License
-" Last Change: 2017/05/20 19:37:32.
+" Last Change: 2017/06/04 00:55:52.
 " =============================================================================
 
 if exists('b:did_indent')
@@ -70,20 +70,6 @@ function! GetHaskellIndent() abort
     return s:indent_eq()
   endif
 
-  " (
-  if line =~# '\v^\s*\('
-    let lnum = s:prevnonblank(v:lnum - 1)
-    if lnum == 0
-      return -1
-    elseif getline(lnum) =~# '\v^\s*\(.+\)\s*,(\s*--.*)?$' || getline(lnum) =~# '\v^\s*\([^()]+\)\s*(::|.*\=)' || getline(lnum) =~# '\v^\s*--'
-      return indent(lnum)
-    elseif getline(lnum) =~# '\v^\s*(<where>|<let>)'
-      return match(getline(lnum), '\v^\s*(<where>|<let>)?\s*\zs')
-    else
-      return indent(lnum) + &shiftwidth
-    endif
-  endif
-
   " }, ], )
   if line =~# '\v^\s*[})\]]'
     return s:indent_parenthesis()
@@ -124,6 +110,18 @@ function! GetHaskellIndent() abort
       return match(nonblankline, '\v^[^[\]]*\[([^[\]]*|\[[^[\]]*\])*\zs\|')
     else
       return match(nonblankline, '\v^\s*}?[^()[\]{}]*\zs[([{]')
+    endif
+  endif
+
+  " (
+  if getline(v:lnum) =~# '\v^\s*\('
+    let lnum = s:prevnonblank(v:lnum - 1)
+    if lnum == 0
+      return -1
+    elseif nonblankline =~# '\v^\s*(<where>|<let>)'
+      return match(nonblankline, '\v^\s*(<where>|<let>)?\s*\zs')
+    elseif nonblankline =~# '\v^\s*<import>'
+      return indent(lnum) + &shiftwidth
     endif
   endif
 
