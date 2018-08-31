@@ -2,7 +2,7 @@
 " Filename: indent/haskell.vim
 " Author: itchyny
 " License: MIT License
-" Last Change: 2017/06/04 00:55:52.
+" Last Change: 2018/08/31 21:42:42.
 " =============================================================================
 
 if exists('b:did_indent')
@@ -118,6 +118,8 @@ function! GetHaskellIndent() abort
     let lnum = s:prevnonblank(v:lnum - 1)
     if lnum == 0
       return -1
+    elseif nonblankline =~# '\v^\s*(<where>|.*<let>).*([-+/*\$&<>=,]+|`\k+`)(\s*--.*)?$'
+      return match(nonblankline, '\v^\s*(<where>|<let>)\s*\zs') + &shiftwidth
     elseif nonblankline =~# '\v^\s*(<where>|<let>)'
       return match(nonblankline, '\v^\s*(<where>|<let>)?\s*\zs')
     elseif nonblankline =~# '\v^\s*<import>'
@@ -175,12 +177,12 @@ function! GetHaskellIndent() abort
     return match(nonblankline, '\v^\s*\|\s*\zs.*\<-\s*.*,(\s*--.*)?$')
   endif
 
-  if nonblankline =~# '\v^\s*([^()[\]{}]*|\([^()[\]{}]*\)|\[[^()[\]{}]*\])*([-+/*\$&<>=,]+|`\k+`)(\s*--.*)?$'
+  if nonblankline =~# '\v([-+/*\$&<>=,]+|`\k+`)(\s*--.*)?$'
     if nonblankline =~# '\v^\s*<let>.*,(\s*--.*)?$'
       return match(nonblankline, '\S')
     else
       return match(nonblankline, '\v^\s*(<where>|.*<let>)?\s*\zs') +
-            \ (nonblankline =~# '\v(<where>|<let>)|(\=|-\>)(\s*--.*)?$' ? &shiftwidth : 0)
+            \ (nonblankline =~# '\v(<where>|<let>)|^\s*\k+\s*\=.*([-+/*\$&<>]|`\k+`)(\s*--.*)?$|(\=|-\>)(\s*--.*)?$' ? &shiftwidth : 0)
     endif
   endif
 
