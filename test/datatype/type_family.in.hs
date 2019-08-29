@@ -17,3 +17,7 @@ z :: e
 instance Y Int where
 type E = Int
 z = 0
+
+type family G a where
+G Int = Bool
+G a   = Char
