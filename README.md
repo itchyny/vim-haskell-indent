@@ -1,4 +1,4 @@
-# vim-haskell-indent [![Build Status](https://travis-ci.org/itchyny/vim-haskell-indent.svg)](https://travis-ci.org/itchyny/vim-haskell-indent)
+# vim-haskell-indent [![CI Status](https://github.com/itchyny/vim-haskell-indent/workflows/CI/badge.svg)](https://github.com/itchyny/vim-haskell-indent/actions)
 ## The best indent plugin for Haskell in Vim
 
 ![vim-haskell-indent](https://raw.githubusercontent.com/wiki/itchyny/vim-haskell-indent/image/1.gif)
