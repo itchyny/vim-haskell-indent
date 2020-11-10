@@ -2,7 +2,7 @@
 " Filename: indent/haskell.vim
 " Author: itchyny
 " License: MIT License
-" Last Change: 2019/08/29 12:29:32.
+" Last Change: 2020/11/10 22:04:38.
 " =============================================================================
 
 if exists('b:did_indent')
@@ -43,8 +43,8 @@ function! GetHaskellIndent() abort
   endif
 
   " deriving
-  if line =~# '\v<deri%[ving]>'
-    if line =~# '\v}\s*deri%[ving]>'
+  if line =~# '\v^\s*<deri%[ving]>'
+    if line =~# '\v^\s*}\s*deri%[ving]>'
       return s:indent_parenthesis()
     endif
     return s:indent('\v<deri%[ving]>', '\v^.*<data>.*\zs\=', 0)
@@ -519,6 +519,9 @@ function! s:indent_parenthesis() abort
   endif
   if indent(end[1] - 1) + 1 < begin[2]
     return match(getline(begin[1]), '\v^\s*(<where>|.*<let>)?\s*\zs')
+  endif
+  if getline(end[1]) =~# '^\s*}' && getline(begin[1]) =~# '\v^\s+\w+\s*\{'
+    return match(getline(begin[1]), '\v^\s+\zs')
   endif
   return begin[2] - 1
 endfunction
