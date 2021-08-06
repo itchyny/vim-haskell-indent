@@ -2,7 +2,7 @@
 " Filename: indent/haskell.vim
 " Author: itchyny
 " License: MIT License
-" Last Change: 2021/08/04 19:27:55.
+" Last Change: 2021/08/07 07:21:36.
 " =============================================================================
 
 if exists('b:did_indent')
@@ -91,7 +91,11 @@ function! GetHaskellIndent() abort
     return 0
   endif
 
-  if line =~# '\v^\s*,([^()[\]{}]*|\([^()[\]{}]*\)|\[[^()[\]{}]*\])*(\s*--.*)?$' && nonblankline =~# '\v^\s*,'
+  let noparen = '[^()[\]{}]'
+  let noparen = '%(' . noparen . '+|\(' . noparen . '*\)|\['  . noparen . '*\])'
+  let noparen = '%(' . noparen . '+|\(' . noparen . '*\)|\['  . noparen . '*\])*'
+
+  if line =~# '\v^\s*,' . noparen . '(\s*--.*)?$' && nonblankline =~# '\v^\s*,'
     return match(nonblankline, '^\s*\zs,')
   endif
 
@@ -106,15 +110,15 @@ function! GetHaskellIndent() abort
     return match(nonblankline, '^\s*\zs--')
   endif
 
-  if nonblankline =~# '\v^\s*}?[^()[\]{}]*[([{]([^()[\]{}]*|\([^()[\]{}]*\)|\[[^()[\]{}]*\])*[-+/*\$&<>,]?(\s*--.*)?$'
+  if nonblankline =~# '\v^\s*}?' . noparen . '[([{]' . noparen . '[-+/*\$&<>,]?(\s*--.*)?$'
     if nonblankline =~# '\v[([{](\s*--.*)?$'
       return match(nonblankline, '\v^\s*(<where>|.*<let>)?\s*\zs') + &shiftwidth
     elseif nonblankline =~# '\v[-+/*\$&<>,](\s*--.*)?$'
-      return match(nonblankline, '\v^\s*}?[^()[\]{}]*(\[.*\|\s*\zs|[([{]\s*\zs)')
+      return match(nonblankline, '\v^\s*}?' . noparen . '(\[.*\|\s*\zs|[([{]\s*\zs)')
     elseif nonblankline =~# '\v^[^[\]]*\[([^[\]]*|\[[^[\]]*\])*\|([^[\]]*|\[[^[\]]*\])*(\s*--.*)?$'
       return match(nonblankline, '\v^[^[\]]*\[([^[\]]*|\[[^[\]]*\])*\zs\|')
     else
-      return match(nonblankline, '\v^\s*}?[^()[\]{}]*\zs[([{]')
+      return match(nonblankline, '\v^\s*}?' . noparen . '\zs[([{]')
     endif
   endif
 
@@ -187,7 +191,7 @@ function! GetHaskellIndent() abort
       return match(nonblankline, '\S')
     else
       return match(nonblankline, '\v^\s*(<where>|.*<let>)?\s*\zs') +
-            \ (nonblankline =~# '\v(<where>|<let>)|^\s*\k+\s*\=.*([-+/*\$&<>]|`\k+`)(\s*--.*)?$|(\=|-\>)(\s*--.*)?$' ? &shiftwidth : 0)
+            \ (nonblankline =~# '\v(<where>|<let>)|^\s*\k+\s*'. noparen .'\=.*([-+/*\$&<>]|`\k+`)(\s*--.*)?$|(\=|-\>)(\s*--.*)?$' ? &shiftwidth : 0)
     endif
   endif
 
