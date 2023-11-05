@@ -2,7 +2,7 @@
 " Filename: indent/haskell.vim
 " Author: itchyny
 " License: MIT License
-" Last Change: 2023/11/05 19:52:08.
+" Last Change: 2023/11/06 08:17:59.
 " =============================================================================
 
 if exists('b:did_indent')
@@ -30,7 +30,7 @@ function! GetHaskellIndent() abort
   endif
 
   " #if, #else, #endif, #include
-  if line =~# '\v^\s*(#$|#\s*\w+)'
+  if line =~# '\v^\s*%(#$|#\s*\w+)'
     return 0
   endif
 
@@ -51,7 +51,7 @@ function! GetHaskellIndent() abort
   endif
 
   " class, instance
-  if line =~# '\v^\s*<(class|instance)>'
+  if line =~# '\v^\s*<%(class|instance)>'
     return 0
   endif
 
@@ -87,7 +87,7 @@ function! GetHaskellIndent() abort
   let nonblankline = getline(s:prevnonblank(v:lnum - 1))
 
   " data, type
-  if line =~# '\v^\s*<(data|type)>' && nonblankline !~# '\v<(class|instance)>.*<where>'
+  if line =~# '\v^\s*<%(data|type)>' && nonblankline !~# '\v<%(class|instance)>.*<where>'
     return 0
   endif
 
@@ -112,11 +112,11 @@ function! GetHaskellIndent() abort
 
   if nonblankline =~# '\v^\s*}?' . noparen . '[([{]' . noparen . '[-+/*\$&<>,]?\s*%(--.*)?$'
     if nonblankline =~# '\v[([{]\s*%(--.*)?$'
-      return match(nonblankline, '\v^\s*(<where>|.*<let>)?\s*\zs') + &shiftwidth
+      return match(nonblankline, '\v^\s*%(<where>|.*<let>)?\s*\zs') + &shiftwidth
     elseif nonblankline =~# '\v[-+/*\$&<>,]\s*%(--.*)?$'
-      return match(nonblankline, '\v^\s*}?' . noparen . '(\[.*\|\s*\zs|[([{]\s*\zs)')
-    elseif nonblankline =~# '\v^[^[\]]*\[([^[\]]*|\[[^[\]]*\])*\|([^[\]]*|\[[^[\]]*\])*\s*%(--.*)?$'
-      return match(nonblankline, '\v^[^[\]]*\[([^[\]]*|\[[^[\]]*\])*\zs\|')
+      return match(nonblankline, '\v^\s*}?' . noparen . '%(\[.*\|\s*\zs|[([{]\s*\zs)')
+    elseif nonblankline =~# '\v^[^[\]]*\[([^[\]]*|\[[^[\]]*\])*\|%([^[\]]*|\[[^[\]]*\])*\s*%(--.*)?$'
+      return match(nonblankline, '\v^[^[\]]*\[%([^[\]]*|\[[^[\]]*\])*\zs\|')
     else
       return match(nonblankline, '\v^\s*}?' . noparen . '\zs[([{]')
     endif
@@ -127,10 +127,10 @@ function! GetHaskellIndent() abort
     let lnum = s:prevnonblank(v:lnum - 1)
     if lnum == 0
       return -1
-    elseif nonblankline =~# '\v^\s*(<where>|.*<let>).*([-+/*\$&<>=,]+|`\k+`)\s*%(--.*)?$'
-      return match(nonblankline, '\v^\s*(<where>|<let>)\s*\zs') + &shiftwidth
-    elseif nonblankline =~# '\v^\s*(<where>|<let>)'
-      return match(nonblankline, '\v^\s*(<where>|<let>)?\s*\zs')
+    elseif nonblankline =~# '\v^\s*%(<where>|.*<let>).*%([-+/*\$&<>=,]+|`\k+`)\s*%(--.*)?$'
+      return match(nonblankline, '\v^\s*<%(where|let)>\s*\zs') + &shiftwidth
+    elseif nonblankline =~# '\v^\s*<%(where|let)>'
+      return match(nonblankline, '\v^\s*%(<where>|<let>)?\s*\zs')
     elseif nonblankline =~# '\v^\s*<import>'
       return indent(lnum) + &shiftwidth
     endif
@@ -145,7 +145,7 @@ function! GetHaskellIndent() abort
   endif
 
   if nonblankline =~# '\v<do>\s*%(--.*)?$'
-    return match(nonblankline, '\v^\s*(<where>|.*<let>)?\s*\zs') + &shiftwidth
+    return match(nonblankline, '\v^\s*%(<where>|.*<let>)?\s*\zs') + &shiftwidth
   endif
 
   if nonblankline =~# '\v<deriving>'
@@ -163,7 +163,7 @@ function! GetHaskellIndent() abort
   if line =~# '\v<case>.*<of>.*\s*%(--.*)?$' && line !~# '^\s*#'
     if get(g:, 'haskell_indent_disable_case', 0)
       if line =~# '\v^\s*<where>'
-        return match(line, '\v^\s*(<where>)?\s*\zs') + &shiftwidth
+        return match(line, '\v^\s*%(<where>)?\s*\zs') + &shiftwidth
       else
         return indent(s:prevnonblank(v:lnum - 1)) + &shiftwidth
       endif
@@ -175,7 +175,7 @@ function! GetHaskellIndent() abort
   endif
 
   if line =~# '\v\\case\s*%(--.*)?$'
-    return match(line, '\v^\s*(<where>|.*<let>)?\s*\zs') + &shiftwidth
+    return match(line, '\v^\s*%(<where>|.*<let>)?\s*\zs') + &shiftwidth
   endif
 
   if nonblankline =~# '\v^.*[^|]\|[^|].*\='
@@ -194,8 +194,8 @@ function! GetHaskellIndent() abort
     if nonblankline =~# '\v^\s*<let>.*,\s*%(--.*)?$'
       return match(nonblankline, '\S')
     else
-      return match(nonblankline, '\v^\s*(<where>|.*<let>)?\s*\zs') +
-            \ (nonblankline =~# '\v(<where>|<let>)|^\s*\k+\s*'. noparen .'\=.*([-+/*\$&<>]|`\k+`)\s*%(--.*)?$|(\=|-\>)\s*%(--.*)?$' ? &shiftwidth : 0)
+      return match(nonblankline, '\v^\s*%(<where>|.*<let>)?\s*\zs') +
+            \ (nonblankline =~# '\v%(<where>|<let>)|^\s*\k+\s*'. noparen .'\=.*%([-+/*\$&<>]|`\k+`)\s*%(--.*)?$|%(\=|-\>)\s*%(--.*)?$' ? &shiftwidth : 0)
     endif
   endif
 
@@ -227,7 +227,7 @@ function! GetHaskellIndent() abort
     while i
       let line = getline(i)
       if getline(i) =~# '\v<case>'
-        return match(line, '\v^\s*(where\s+)?\zs')
+        return match(line, '\v^\s*%(where\s+)?\zs')
       endif
       let i -= 1
     endwhile
@@ -241,7 +241,7 @@ function! GetHaskellIndent() abort
   endif
 
   if nonblankline =~# '\v<let>\s+.*\=' && nonblankline !~# '\v<let>\s+.*\=.*<in>'
-    return s:indent('', getline(v:lnum) =~# '\v^\s*(<in>|\S+\s*\=)' ? '\v<let>\s+\zs\S' : '\v<let>', 0)
+    return s:indent('', getline(v:lnum) =~# '\v^\s*%(<in>|\S+\s*\=)' ? '\v<let>\s+\zs\S' : '\v<let>', 0)
   endif
 
   " in
@@ -274,8 +274,8 @@ function! GetHaskellIndent() abort
       if 0 <= indent(i) && indent(i) < indent && line !~# '\v<where>|^\s*\||^$'
         return line =~# '\v^\s*[([{]' ? indent : indent(i)
       endif
-      if line =~# '\v^\s*<(class|instance)>' && found_where
-        return match(line, '\v^\s*<(class|instance)>') + &shiftwidth
+      if line =~# '\v^\s*<%(class|instance)>' && found_where
+        return match(line, '\v^\s*<%(class|instance)>') + &shiftwidth
       elseif line =~# '^\S'
         return 0
       endif
@@ -331,7 +331,7 @@ function! s:in_comment() abort
   if getline(v:lnum) =~# '^\s*--'
     return 1
   endif
-  let start = searchpos('\v(--.*)@<!\{-', 'bcnW')
+  let start = searchpos('\v%(--.*)@<!\{-', 'bcnW')
   let pos = getpos('.')
   let end = searchpos('-}', 'bcnW')
   return start != [0, 0] && (start[0] < pos[1] || start[0] == pos[1] && start[1] <= pos[2])
@@ -343,20 +343,20 @@ function! s:indent_comment() abort
   if getline(s:prevnonblank(v:lnum - 1)) =~# '\v\{-#\s*UNPACK\s*#-}' && getline(v:lnum) =~# '\v^\s*\{-#\s*UNPACK\s*#-}'
     return match(getline(s:prevnonblank(v:lnum - 1)), '\v\{-#\s*UNPACK\s*#-}')
   elseif getline(v:lnum) =~# '\v^\s*\{-#\s*<RULES>\s*%(--.*)?$'
-    let name = matchstr(getline(v:lnum + 1), '\v^\s*"\zs\k+\ze(/\k+)*"')
+    let name = matchstr(getline(v:lnum + 1), '\v^\s*"\zs\k+\ze%(/\k+)*"')
     if name !=# ''
       let i = v:lnum - 1
       while i
-        if getline(i) =~# '\v^\s*(where\s+)?<' . name . '>.*\='
-          return match(getline(i), '\v^\s*(<where>)?\s*\zs')
+        if getline(i) =~# '\v^\s*%(where\s+)?<' . name . '>.*\='
+          return match(getline(i), '\v^\s*%(<where>)?\s*\zs')
         endif
         let i -= 1
       endwhile
     endif
   endif
-  if getline(v:lnum) =~# '\v^\s*\{-#\s*<(INLINE|RULES)>'
+  if getline(v:lnum) =~# '\v^\s*\{-#\s*<%(INLINE|RULES)>'
     return -1
-  elseif getline(v:lnum) =~# '\v^\s*(\{- \||\{-#.*#-}\s*%(--.*)?$|-- -{10,})'
+  elseif getline(v:lnum) =~# '\v^\s*%(\{- \||\{-#.*#-}\s*%(--.*)?$|-- -{10,})'
     return 0
   endif
   if getline(v:lnum) =~# '^\s*[-{]-'
@@ -365,7 +365,7 @@ function! s:indent_comment() abort
       while i <= line('$') && (getline(i) =~# '^\s*--' || getline(i) ==# '')
         let i += 1
       endwhile
-      if getline(i) =~# '\v^\s*<(class|instance|data)>|::.*(-\>|-- *\^)'
+      if getline(i) =~# '\v^\s*<%(class|instance|data)>|::.*%(-\>|-- *\^)'
         return match(getline(i), '^\s*\zs\S')
       endif
     endif
@@ -376,7 +376,7 @@ function! s:indent_comment() abort
       let indent = indent(i)
       if line =~# '^\s*[-{]-'
         return indent
-      elseif line =~# '\v^\s*<(class|instance)>|^\s*<where>\s*%(--.*)?$' && line !~# '\v,\s*%(--.*)?$'
+      elseif line =~# '\v^\s*<%(class|instance)>|^\s*<where>\s*%(--.*)?$' && line !~# '\v,\s*%(--.*)?$'
         return indent + &shiftwidth
       elseif line =~# '\v\s*\(\s*%(--.*)?$'
         return previndent ? previndent : indent + &shiftwidth
@@ -387,7 +387,7 @@ function! s:indent_comment() abort
       let i -= 1
     endwhile
   endif
-  let listpattern = '\v^\s*(\* \@|[a-z]\)\s+|\>\s+)'
+  let listpattern = '\v^\s*%(\* \@|[a-z]\)\s+|\>\s+)'
   if getline(v:lnum) =~# listpattern
     if getline(s:prevnonblank(v:lnum - 1)) =~# listpattern
       return indent(s:prevnonblank(v:lnum - 1))
@@ -415,7 +415,7 @@ function! s:indent_comment() abort
     return 0
   endif
   let line = getline(s:prevnonblank(v:lnum - 1))
-  if line =~# '\v^\s*\{-#\s*(\s+\w+,?)+'
+  if line =~# '\v^\s*\{-#\s*%(\s+\w+,?)+'
     if line =~# '\v,\s*%(--.*)?$'
       return match(line, '\v\zs<\w+,')
     else
@@ -432,7 +432,7 @@ function! s:indent_comment() abort
       return indent(i) - &shiftwidth
     endif
   endif
-  if getline(v:lnum) =~# '\v^\s*(#?-}|#$)'
+  if getline(v:lnum) =~# '\v^\s*%(#?-}|#$)'
     let i = v:lnum - 1
     while 0 < i
       if getline(i) =~# '{-'
@@ -465,10 +465,10 @@ function! s:indent_bar() abort
   let indent = indent(i)
   while i > 0
     let line = getline(i)
-    if line =~# '\v^[^[\]]*([^[\]]*|\[[^[\]]*\])*\[([^[\]]*|\[[^[\]]*\])*(--.*)?$'
-      return match(line, '\v^[^[\]]*([^[\]]*|\[[^[\]]*\])*\zs\[([^[\]]*|\[[^[\]]*\])*(--.*)?$') + &shiftwidth
-    elseif line =~# '\v^\s*(<where>)?.*[^|]\|[^|].*\='
-      return match(line, '\v^\s*(<where>)?.*[^|]\zs\|[^|].*\=')
+    if line =~# '\v^[^[\]]*%([^[\]]*|\[[^[\]]*\])*\[%([^[\]]*|\[[^[\]]*\])*%(--.*)?$'
+      return match(line, '\v^[^[\]]*%([^[\]]*|\[[^[\]]*\])*\zs\[([^[\]]*|\[[^[\]]*\])*%(--.*)?$') + &shiftwidth
+    elseif line =~# '\v^\s*%(<where>)?.*[^|]\|[^|].*\='
+      return match(line, '\v^\s*%(<where>)?.*[^|]\zs\|[^|].*\=')
     elseif line =~# '\v<data>.*\='
       return match(line, '\v^.*<data>.*\zs\=')
     elseif line =~# '\v^\s*<where>\s*%(--.*)?$' && indent(i) < indent || line =~# '^\S'
@@ -501,7 +501,7 @@ function! s:after_guard() abort
         return 0
       endif
       if where_clause && line !~# '\v^\s*%(--.*)?$' && line !~# '\v^\s*\|[^|]'
-        return match(line, '\v^\s*(<where>)?\s*\zs')
+        return match(line, '\v^\s*%(<where>)?\s*\zs')
       endif
       if line =~# '\v<where>'
         let where_clause = 1
@@ -509,12 +509,12 @@ function! s:after_guard() abort
       let i -= 1
     endwhile
   endif
-  if nonblankline =~# '\v[^|]\|\s*(otherwise|True|0\s*\<\s*1|1\s*\>\s*0)' || getline(v:lnum) =~# '^\s*\S'
+  if nonblankline =~# '\v[^|]\|\s*%(otherwise|True|0\s*\<\s*1|1\s*\>\s*0)' || getline(v:lnum) =~# '^\s*\S'
     let i = s:prevnonblank(v:lnum - 1)
     while i
       let line = getline(i)
       if line !~# '\v^\s*%(--.*)?$' && line !~# '^\s*|'
-        return match(line, '\v^\s*(<where>)?\s*\zs')
+        return match(line, '\v^\s*%(<where>)?\s*\zs')
       endif
       let i -= 1
     endwhile
@@ -527,7 +527,7 @@ endfunction
 
 " =
 function! s:indent_eq() abort
-  return match(getline(s:prevnonblank(v:lnum - 1)), '\v^\s*(<where>|<let>)?\s*\zs') + &shiftwidth
+  return match(getline(s:prevnonblank(v:lnum - 1)), '\v^\s*%(<where>|<let>)?\s*\zs') + &shiftwidth
 endfunction
 
 " }, ], )
@@ -543,7 +543,7 @@ function! s:indent_parenthesis() abort
     return -1
   endif
   if indent(end[1] - 1) + 1 < begin[2]
-    return match(getline(begin[1]), '\v^\s*(<where>|.*<let>)?\s*\zs')
+    return match(getline(begin[1]), '\v^\s*%(<where>|.*<let>)?\s*\zs')
   endif
   if getline(end[1]) =~# '^\s*}' && getline(begin[1]) =~# '\v^\s+\w+\s*\{'
     return match(getline(begin[1]), '\v^\s+\zs')
@@ -576,13 +576,13 @@ function! s:unindent_after_parenthesis(line, column) abort
       let i -= 1
     endwhile
   elseif getline(begin[1]) =~# '^\s*='
-    return match(getline(s:prevnonblank(begin[1] - 1)), '\v^\s*(<where>|<let>)?\s*\zs')
+    return match(getline(s:prevnonblank(begin[1] - 1)), '\v^\s*%(<where>|<let>)?\s*\zs')
   elseif getline(s:prevnonblank(begin[1] - 1)) =~# '\v\=\s*%(--.*)?$'
-    return match(getline(s:prevnonblank(begin[1] - 1)), '\v^\s*(<where>|<let>)?\s*\zs')
+    return match(getline(s:prevnonblank(begin[1] - 1)), '\v^\s*%(<where>|<let>)?\s*\zs')
   elseif getline(s:prevnonblank(begin[1] - 1)) =~# '\v<import>'
     return 0
   endif
-  return match(getline(begin[1]), '\v^\s*(<where>)?\s*\zs')
+  return match(getline(begin[1]), '\v^\s*%(<where>)?\s*\zs')
 endfunction
 
 " where
@@ -591,8 +591,8 @@ function! s:indent_where() abort
     let i = s:prevnonblank(v:lnum - 1)
     while i > 0
       let line = getline(i)
-      if line =~# '\v^\s*(<where>)?\s*\zs\h.*\=|^\s*[^| ]'
-        return match(line, '\v^\s*(<where>)?\s*\zs\h.*\=|^\s*[^| ]') + &shiftwidth
+      if line =~# '\v^\s*%(<where>)?\s*\zs\h.*\=|^\s*[^| ]'
+        return match(line, '\v^\s*%(<where>)?\s*\zs\h.*\=|^\s*[^| ]') + &shiftwidth
       elseif line =~# '^\S'
         return -1
       endif
@@ -605,20 +605,20 @@ function! s:indent_where() abort
     let begin = getpos('.')
     call setpos('.', pos)
     call winrestview(view)
-    if getline(begin[1]) =~# '\v(<module>|<class>|<instance>)'
+    if getline(begin[1]) =~# '\v<%(module|class|instance)>'
       return indent(begin[1]) + &shiftwidth
-    elseif getline(s:prevnonblank(begin[1] - 1)) =~# '\v(<module>|<class>|<instance>)'
+    elseif getline(s:prevnonblank(begin[1] - 1)) =~# '\v<%(module|class|instance)>'
       return indent(s:prevnonblank(begin[1] - 1)) + &shiftwidth
-    elseif getline(begin[1]) =~# '\v^\s*\((--.*)?'
+    elseif getline(begin[1]) =~# '\v^\s*\(%(--.*)?'
       return indent(begin[1])
     endif
-  elseif getline(v:lnum) =~# '\v^\s*(<module>|<class>|<instance>)'
+  elseif getline(v:lnum) =~# '\v^\s*<%(module|class|instance)>'
     return 0
-  elseif getline(v:lnum) =~# '\v<where>\s*(--.*)?'
+  elseif getline(v:lnum) =~# '\v<where>\s*%(--.*)?'
     let i = s:prevnonblank(v:lnum - 1)
     if i > 0
       let line = getline(i)
-      if line =~# '\v^\s*(<module>|<class>|<instance>)'
+      if line =~# '\v^\s*<%(module|class|instance)>'
         return indent(i) + &shiftwidth
       endif
     endif
@@ -637,7 +637,7 @@ function! s:after_where() abort
     call setpos('.', pos)
     call winrestview(view)
     let i = getline(begin[1]) =~# '^\s*(' ? s:prevnonblank(begin[1] - 1) : begin[1]
-    if i > 0 && getline(i) =~# '\v(<module>|<class>|<instance>)'
+    if i > 0 && getline(i) =~# '\v<%(module|class|instance)>'
       return 0
     endif
   endif
@@ -647,12 +647,12 @@ function! s:after_where() abort
       let line = getline(i)
       if line =~# '\v^\s*<module>'
         return 0
-      elseif line =~# '\v^\s*(<class>|<instance>|<data>|<type> +<family>)'
+      elseif line =~# '\v^\s*%(<class>|<instance>|<data>|<type> +<family>)'
         if line =~# '\v<where>\s*%(--.*)?$' && i != s:prevnonblank(v:lnum - 1)
           break
         endif
-        return match(line, '\v(<class>|<instance>|<data>|<type> +<family>)') + &shiftwidth
-      elseif line =~# '\v^(\S|\s*\k+\s*\=)' && line !~# '^--'
+        return match(line, '\v%(<class>|<instance>|<data>|<type> +<family>)') + &shiftwidth
+      elseif line =~# '\v^%(\S|\s*\k+\s*\=)' && line !~# '^--'
         return match(getline(s:prevnonblank(v:lnum - 1)), '\v<where>') + &shiftwidth
       endif
       let i -= 1
@@ -669,7 +669,7 @@ function! s:after_where() abort
         if line =~# '^\S'
           return 0
         elseif indent(i) < indent
-          return match(line, '\v^\s*(<where>)?\s*\zs')
+          return match(line, '\v^\s*%(<where>)?\s*\zs')
         endif
         let i -= 1
       endwhile
