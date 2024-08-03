@@ -148,6 +148,10 @@ function! GetHaskellIndent() abort
     return match(nonblankline, '\v^\s*%(<where>|.*<let>)?\s*\zs') + &shiftwidth
   endif
 
+  if nonblankline =~# '\v<do>\s*[[:alnum:](]'
+    return match(nonblankline, '\v<do>\s*\zs\S')
+  endif
+
   if nonblankline =~# '\v<deriving>'
     return s:indent('', '\v^\s*\zs<data>', 0)
   endif
