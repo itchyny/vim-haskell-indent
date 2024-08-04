@@ -2,7 +2,7 @@
 " Filename: indent/haskell.vim
 " Author: itchyny
 " License: MIT License
-" Last Change: 2023/11/07 19:40:39.
+" Last Change: 2024/08/04 10:18:19.
 " =============================================================================
 
 if exists('b:did_indent')
