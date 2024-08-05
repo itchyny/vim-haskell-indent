@@ -178,8 +178,8 @@ function! GetHaskellIndent() abort
     return match(line, '\v^\s*%(<where>|.*<let>)?\s*\zs') + &shiftwidth
   endif
 
-  if line =~# '\v\\\s*<case>\s*[[:alnum:](]'
-    return match(line, '\v\\<case>\s*\zs\S')
+  if line =~# '\v\\\s*<case>\s*[[:alnum:](-]'
+    return match(line, '\v\\\s*<case>\s*\zs\S')
   endif
 
   if nonblankline =~# '\v^.*[^|]\|[^|].*\='
