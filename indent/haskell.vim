@@ -475,6 +475,8 @@ function! s:indent_bar() abort
     let line = getline(i)
     if line =~# '\v^[^[\]]*%([^[\]]*|\[[^[\]]*\])*\[%([^[\]]*|\[[^[\]]*\])*%(--.*)?$'
       return match(line, '\v^[^[\]]*%([^[\]]*|\[[^[\]]*\])*\zs\[([^[\]]*|\[[^[\]]*\])*%(--.*)?$') + &shiftwidth
+    elseif line =~# '\v\\\s*<cases>.*\|'
+      return match(line, '\v\\\s*<cases>.*\zs\|')
     elseif line =~# '\v^\s*%(<where>)?.*[^|]\|[^|].*\='
       return match(line, '\v^\s*%(<where>)?.*[^|]\zs\|[^|].*\=')
     elseif line =~# '\v<data>.*\='
