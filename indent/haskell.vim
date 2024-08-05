@@ -178,6 +178,14 @@ function! GetHaskellIndent() abort
     return match(line, '\v^\s*%(<where>|.*<let>)?\s*\zs') + &shiftwidth
   endif
 
+  if line =~# '\v\\\s*<cases>\s*%(--.*)?$'
+    return match(line, '\v^\s*%(<where>|.*<let>)?\s*\zs') + &shiftwidth
+  endif
+
+  if line =~# '\v\\\s*<cases>\s*[[:alnum:](_\-\"'']' 
+    return match(line, '\v\\\s*<cases>\s*\zs\S')
+  endif
+
   if nonblankline =~# '\v^.*[^|]\|[^|].*\='
     return s:after_guard()
   endif
@@ -467,6 +475,8 @@ function! s:indent_bar() abort
     let line = getline(i)
     if line =~# '\v^[^[\]]*%([^[\]]*|\[[^[\]]*\])*\[%([^[\]]*|\[[^[\]]*\])*%(--.*)?$'
       return match(line, '\v^[^[\]]*%([^[\]]*|\[[^[\]]*\])*\zs\[([^[\]]*|\[[^[\]]*\])*%(--.*)?$') + &shiftwidth
+    elseif line =~# '\v\\\s*<cases>.*\|'
+      return match(line, '\v\\\s*<cases>.*\zs\|')
     elseif line =~# '\v^\s*%(<where>)?.*[^|]\|[^|].*\='
       return match(line, '\v^\s*%(<where>)?.*[^|]\zs\|[^|].*\=')
     elseif line =~# '\v<data>.*\='
