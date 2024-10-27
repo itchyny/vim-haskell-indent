@@ -191,7 +191,10 @@ function! GetHaskellIndent() abort
   endif
 
   if nonblankline =~# '\v[)}\]]\s*%(--.*)?$'
-    return s:unindent_after_parenthesis(s:prevnonblank(v:lnum - 1), match(nonblankline, '\v[)}\]]\s*%(--.*)?$'))
+    let i = s:unindent_after_parenthesis(s:prevnonblank(v:lnum - 1), match(nonblankline, '\v[)}\]]\s*%(--.*)?$'))
+    if i >= 0
+      return i
+    endif
   endif
 
   if nonblankline =~# '\v^\s*\|\s*.*\<-\s*.*,\s*%(--.*)?$'
@@ -245,7 +248,6 @@ function! GetHaskellIndent() abort
     if nonblankline =~# '\v\{-#\s*UNPACK\s*#-}' && getline(v:lnum) =~# '\v^\s*\{-#\s*UNPACK\s*#-}'
       return match(nonblankline, '\v\{-#\s*UNPACK\s*#-}')
     endif
-    return s:indent('', '\v^.*<data>.*\zs\=', 0)
   endif
 
   if nonblankline =~# '\v<let>\s+.*\=' && nonblankline !~# '\v<let>\s+.*\=.*<in>'
@@ -563,7 +565,7 @@ endfunction
 function! s:unindent_after_parenthesis(line, column) abort
   let i = s:prevnonblank(v:lnum - 1)
   if i < v:lnum - 2
-    return 0
+    return -1
   endif
   let pos = getpos('.')
   let view = winsaveview()
@@ -572,6 +574,9 @@ function! s:unindent_after_parenthesis(line, column) abort
   let begin = getpos('.')
   call setpos('.', pos)
   call winrestview(view)
+  if v:lnum - 1 == begin[1]
+    return -1
+  endif
   if getline(begin[1]) =~# '\v<deriving>'
     let i = begin[1]
     while i
@@ -579,7 +584,7 @@ function! s:unindent_after_parenthesis(line, column) abort
       if getline(i) =~# '\v<data>'
         return match(line, '\v<data>')
       elseif line =~# '^\S'
-        return -1
+        return 0
       endif
       let i -= 1
     endwhile
