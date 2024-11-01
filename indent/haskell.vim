@@ -2,7 +2,7 @@
 " Filename: indent/haskell.vim
 " Author: itchyny
 " License: MIT License
-" Last Change: 2024/08/04 15:46:49.
+" Last Change: 2024/11/01 20:51:18.
 " =============================================================================
 
 if exists('b:did_indent')
@@ -110,6 +110,52 @@ function! GetHaskellIndent() abort
     return match(nonblankline, '^\s*\zs--')
   endif
 
+  if nonblankline =~# '\v^\s*<infix[rl]?>'
+    return match(nonblankline, '\S')
+  endif
+
+  if nonblankline =~# '\v^\s*<instance>.*\=\>\s*%(--.*)?$'
+    return match(nonblankline, '\v^\s*\zs<instance>') + &shiftwidth
+  endif
+
+  if nonblankline =~# '\v<do>\s*%(--.*)?$'
+    return match(nonblankline, '\v^\s*%(<where>|.*<let>)?\s*\zs') + &shiftwidth
+  endif
+
+  if nonblankline =~# '\v<do>\s*[[:alnum:](]'
+    return match(nonblankline, '\v<do>\s*\zs\S')
+  endif
+
+  if line =~# '\v<if>' && line !~# '\v^\s*#'
+    if line !~# '\v<then>'
+      return match(line, '\v.*<if>\s*\zs')
+    elseif line !~# '\v<else>'
+      return match(line, '\v.*\zs<then>')
+    endif
+  endif
+
+  if line =~# '\v<case>.*<of>.*\s*%(--.*)?$' && line !~# '^\s*#'
+    if get(g:, 'haskell_indent_disable_case', 0)
+      if line =~# '\v^\s*<where>'
+        return match(line, '\v^\s*%(<where>)?\s*\zs') + &shiftwidth
+      else
+        return indent(s:prevnonblank(v:lnum - 1)) + &shiftwidth
+      endif
+    else
+      return line =~# '\v<case>.*<of>\s*([[:alnum:](\"''\[]|-\d)'
+            \ ? match(line, '\v<case>.*<of>\s*\zs\S')
+            \ : match(line, '\v.*<case>\s*\zs')
+    endif
+  endif
+
+  if line =~# '\v\\case\s*%(--.*)?$'
+    return match(line, '\v^\s*%(<where>|.*<let>)?\s*\zs') + &shiftwidth
+  endif
+
+  if line =~# '\v\\\s*<case>\s*[[:alnum:](\-\"''\[]'
+    return match(line, '\v\\\s*<case>\s*\zs\S')
+  endif
+
   if nonblankline =~# '\v^\s*}?' . noparen . '[([{]' . noparen . '[-+/*\$&<>,]?\s*%(--.*)?$'
     if nonblankline =~# '\v[([{]\s*%(--.*)?$'
       return match(nonblankline, '\v^\s*%(<where>|.*<let>)?\s*\zs') + &shiftwidth
@@ -136,54 +182,8 @@ function! GetHaskellIndent() abort
     endif
   endif
 
-  if nonblankline =~# '\v^\s*<infix[rl]?>'
-    return match(nonblankline, '\S')
-  endif
-
-  if nonblankline =~# '\v^\s*<instance>.*\=\>\s*%(--.*)?$'
-    return match(nonblankline, '\v^\s*\zs<instance>') + &shiftwidth
-  endif
-
-  if nonblankline =~# '\v<do>\s*%(--.*)?$'
-    return match(nonblankline, '\v^\s*%(<where>|.*<let>)?\s*\zs') + &shiftwidth
-  endif
-
-  if nonblankline =~# '\v<do>\s*[[:alnum:](]'
-    return match(nonblankline, '\v<do>\s*\zs\S')
-  endif
-
   if nonblankline =~# '\v<deriving>'
     return s:indent('', '\v^\s*\zs<data>', 0)
-  endif
-
-  if line =~# '\v<if>' && line !~# '\v^\s*#'
-    if line !~# '\v<then>'
-      return match(line, '\v.*<if>\s*\zs')
-    elseif line !~# '\v<else>'
-      return match(line, '\v.*\zs<then>')
-    endif
-  endif
-
-  if line =~# '\v<case>.*<of>.*\s*%(--.*)?$' && line !~# '^\s*#'
-    if get(g:, 'haskell_indent_disable_case', 0)
-      if line =~# '\v^\s*<where>'
-        return match(line, '\v^\s*%(<where>)?\s*\zs') + &shiftwidth
-      else
-        return indent(s:prevnonblank(v:lnum - 1)) + &shiftwidth
-      endif
-    else
-      return line =~# '\v<case>.*<of>\s*[[:alnum:](]'
-            \ ? match(line, '\v<case>.*<of>\s*\zs\S')
-            \ : match(line, '\v.*<case>\s*\zs')
-    endif
-  endif
-
-  if line =~# '\v\\case\s*%(--.*)?$'
-    return match(line, '\v^\s*%(<where>|.*<let>)?\s*\zs') + &shiftwidth
-  endif
-
-  if line =~# '\v\\\s*<case>\s*[[:alnum:](\-\"''\[]'
-    return match(line, '\v\\\s*<case>\s*\zs\S')
   endif
 
   if nonblankline =~# '\v^.*[^|]\|[^|].*\='
