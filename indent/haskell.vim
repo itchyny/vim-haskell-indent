@@ -456,14 +456,8 @@ endfunction
 
 " else
 function! s:indent_else() abort
-  let i = s:prevnonblank(v:lnum - 1)
-  while i > 0
-    let line = getline(i)
-    if line =~# '\v<then>'
-      return match(line, '\v<then>')
-    endif
-    let i = s:prevnonblank(i - 1)
-  endwhile
+  let [lnum, col] = searchpairpos('\v<if>', '\v<then>', '\v<else>\zs', 'bnW')
+  return col - 1
 endfunction
 
 " |
