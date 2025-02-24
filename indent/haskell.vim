@@ -12,7 +12,7 @@ endif
 let b:did_indent = 1
 
 setlocal indentexpr=GetHaskellIndent()
-setlocal indentkeys=!^F,o,O,=wher,=deri,==,0=in,0=class,0=instance,0=data,0=type,0=else,0<bar>,0},0],0(,0),0#,0,0==
+setlocal indentkeys=!^F,o,O,=wher,=deri,==,0=in,0=class,0=instance,0=data,0=type,0=else,0=then,0<bar>,0},0],0(,0),0#,0,0==
 
 let s:save_cpo = &cpo
 set cpo&vim
@@ -53,6 +53,11 @@ function! GetHaskellIndent() abort
   " class, instance
   if line =~# '\v^\s*<%(class|instance)>'
     return 0
+  endif
+
+  " then
+  if line =~# '\v^\s*<then>'
+    return s:indent_then()
   endif
 
   " else
@@ -454,16 +459,21 @@ function! s:indent_comment() abort
   return indent(s:prevnonblank(v:lnum - 1))
 endfunction
 
+" then
+function! s:indent_then() abort
+  let [lnum, col] = searchpairpos('\v<if>', '', '\v<then>\zs', 'bnW')
+  if lnum == 0 && col == 0
+    return -1
+  else
+    " consider adding option to decide where to indent 'then'
+    return match(getline(lnum)[col - 1:], '\v<if>\s*\zs') + col - 1
+  endif
+endfunction
+
 " else
 function! s:indent_else() abort
-  let i = s:prevnonblank(v:lnum - 1)
-  while i > 0
-    let line = getline(i)
-    if line =~# '\v<then>'
-      return match(line, '\v<then>')
-    endif
-    let i = s:prevnonblank(i - 1)
-  endwhile
+  let [lnum, col] = searchpairpos('\v<if>', '\v<then>', '\v<else>\zs', 'bnW')
+  return col - 1
 endfunction
 
 " |
