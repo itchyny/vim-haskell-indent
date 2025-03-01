@@ -2,7 +2,7 @@
 " Filename: indent/haskell.vim
 " Author: itchyny
 " License: MIT License
-" Last Change: 2024/11/01 20:51:18.
+" Last Change: 2025/03/01 19:41:22.
 " =============================================================================
 
 if exists('b:did_indent')
@@ -128,7 +128,8 @@ function! GetHaskellIndent() abort
   endif
 
   if nonblankline =~# '\v<do>\s*[[:alnum:](]'
-    return match(nonblankline, '\v<do>\s*\zs\S')
+    let i = strridx(nonblankline, 'do ')
+    return match(nonblankline, '\v<do>\s*\zs', i)
   endif
 
   if line =~# '\v<if>' && line !~# '\v^\s*#'
