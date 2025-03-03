@@ -1,3 +1,3 @@
-do foo <- do bar <- baz
+do foo <- do undo <- baz
              qux
              quux
