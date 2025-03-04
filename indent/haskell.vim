@@ -124,7 +124,7 @@ function! GetHaskellIndent() abort
   endif
 
   if nonblankline =~# '\v<do>\s*%(--.*)?$'
-    return match(nonblankline, '\v^\s*%(<where>|.*<let>)?\s*\zs') + &shiftwidth
+    return match(nonblankline, '\v^\s*%(<where>|.*<let>)?\s*\zs') + get(g:, 'haskell_indent_do', &shiftwidth)
   endif
 
   if nonblankline =~# '\v<do>\s*[[:alnum:](]'
@@ -133,7 +133,9 @@ function! GetHaskellIndent() abort
 
   if line =~# '\v<if>' && line !~# '\v^\s*#'
     if line !~# '\v<then>'
-      return match(line, '\v.*<if>\s*\zs')
+      return exists('g:haskell_indent_if')
+            \ ? match(line, '\v.*\zs<if>') + g:haskell_indent_if
+            \ : match(line, '\v.*<if>\s*\zs')
     elseif line !~# '\v<else>'
       return match(line, '\v.*\zs<then>')
     endif
@@ -147,9 +149,13 @@ function! GetHaskellIndent() abort
         return indent(s:prevnonblank(v:lnum - 1)) + &shiftwidth
       endif
     else
-      return line =~# '\v<case>.*<of>\s*([[:alnum:](\"''\[]|-\d)'
-            \ ? match(line, '\v<case>.*<of>\s*\zs\S')
-            \ : match(line, '\v.*<case>\s*\zs')
+      if line =~# '\v<case>.*<of>\s*([[:alnum:](\"''\[]|-\d)'
+        return match(line, '\v<case>.*<of>\s*\zs')
+      else
+        return exists('g:haskell_indent_case')
+              \ ? match(line, '\v.*\zs<case>') + g:haskell_indent_case
+              \ : match(line, '\v.*<case>\s*\zs')
+      endif
     endif
   endif
 
@@ -465,8 +471,9 @@ function! s:indent_then() abort
   if lnum == 0 && col == 0
     return -1
   else
-    " consider adding option to decide where to indent 'then'
-    return match(getline(lnum)[col - 1:], '\v<if>\s*\zs') + col - 1
+    return exists('g:haskell_indent_if')
+          \ ? g:haskell_indent_if + col - 1
+          \ : match(getline(lnum)[col - 1:], '\v<if>\s*\zs') + col - 1
   endif
 endfunction
 
