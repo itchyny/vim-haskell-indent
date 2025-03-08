@@ -72,7 +72,9 @@ function! GetHaskellIndent() abort
 
   " in
   if line =~# '\v^\s*<in>'
-    return s:indent('\v^\s*<in>', '\v^.*<let>\s*\zs', 0, -1)
+    return exists('g:haskell_indent_in')
+          \ ? s:indent('\v^\s*<in>', '\v^.*\zs<let>', 0, -1) + g:haskell_indent_in
+          \ : s:indent('\v^\s*<in>', '\v^.*<let>\s*\zs', 0, -1)
   endif
 
   " =
