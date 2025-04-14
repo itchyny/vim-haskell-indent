@@ -76,6 +76,12 @@ function! GetHaskellIndent() abort
   endif
 
   " =
+  if line =~# '\v\='
+    if getline(v:lnum - 1) =~# '\v^\s*-\>'
+      return indent(v:lnum - 1) - &shiftwidth
+    endif
+  endif
+
   if line =~# '\v^\s*\='
     return s:indent_eq()
   endif
@@ -105,6 +111,11 @@ function! GetHaskellIndent() abort
   endif
 
   let line = getline(v:lnum - 1)
+
+  " ::
+  if line =~# '::\s*$'
+    return indent(v:lnum - 1) + &shiftwidth
+  endif
 
   " #if, #else, #endif, #include
   if nonblankline =~# '^\s*#'
