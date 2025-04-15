@@ -112,11 +112,6 @@ function! GetHaskellIndent() abort
 
   let line = getline(v:lnum - 1)
 
-  " ::
-  if line =~# '::\s*$'
-    return indent(v:lnum - 1) + &shiftwidth
-  endif
-
   " #if, #else, #endif, #include
   if nonblankline =~# '^\s*#'
     return 0
