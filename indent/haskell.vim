@@ -2,7 +2,7 @@
 " Filename: indent/haskell.vim
 " Author: itchyny
 " License: MIT License
-" Last Change: 2025/04/15 08:09:38.
+" Last Change: 2026/09/19 00:40:02.
 " =============================================================================
 
 if exists('b:did_indent')
@@ -146,17 +146,7 @@ function! GetHaskellIndent() abort
   endif
 
   if line =~# '\v<case>.*<of>.*\s*%(--.*)?$' && line !~# '^\s*#'
-    if get(g:, 'haskell_indent_disable_case', 0)
-      if line =~# '\v^\s*<where>'
-        return match(line, '\v^\s*%(<where>)?\s*\zs') + &shiftwidth
-      else
-        return indent(s:prevnonblank(v:lnum - 1)) + &shiftwidth
-      endif
-    else
-      return line =~# '\v<case>.*<of>\s*([[:alnum:](\"''\[]|-\d)'
-            \ ? match(line, '\v<case>.*<of>\s*\zs\S')
-            \ : match(line, '\v.*<case>\s*\zs')
-    endif
+    return s:indent_case(v:lnum - 1)
   endif
 
   if line =~# '\v\\\s*<case>\s*%(--.*)?$'
@@ -175,15 +165,16 @@ function! GetHaskellIndent() abort
     return match(line, '\v\\\s*<case>\s*\zs\S')
   endif
 
-  if nonblankline =~# '\v^\s*}?' . noparen . '[([{]' . noparen . '[-+/*\$&<>,]?\s*%(--.*)?$'
-    if nonblankline =~# '\v[([{]\s*%(--.*)?$'
-      return match(nonblankline, '\v^\s*%(<where>|.*<let>)?\s*\zs') + &shiftwidth
-    elseif nonblankline =~# '\v[-+/*\$&<>,]\s*%(--.*)?$'
-      return match(nonblankline, '\v^\s*}?' . noparen . '%(\[.*\|\s*\zs|[([{]\s*\zs)')
-    elseif nonblankline =~# '\v^[^[\]]*\[([^[\]]*|\[[^[\]]*\])*\|%([^[\]]*|\[[^[\]]*\])*\s*%(--.*)?$'
-      return match(nonblankline, '\v^[^[\]]*\[%([^[\]]*|\[[^[\]]*\])*\zs\|')
+  let unquoted = s:unquote(nonblankline)
+  if unquoted =~# '\v^\s*}?' . noparen . '[([{]' . noparen . '[-+/*\$&<>,]?\s*%(--.*)?$'
+    if unquoted =~# '\v[([{]\s*%(--.*)?$'
+      return match(unquoted, '\v^\s*%(<where>|.*<let>)?\s*\zs') + &shiftwidth
+    elseif unquoted =~# '\v[-+/*\$&<>,]\s*%(--.*)?$'
+      return match(unquoted, '\v^\s*}?' . noparen . '%(\[.*\|\s*\zs|[([{]\s*\zs)')
+    elseif unquoted =~# '\v^[^[\]]*\[([^[\]]*|\[[^[\]]*\])*\|%([^[\]]*|\[[^[\]]*\])*\s*%(--.*)?$'
+      return match(unquoted, '\v^[^[\]]*\[%([^[\]]*|\[[^[\]]*\])*\zs\|')
     else
-      return match(nonblankline, '\v^\s*}?' . noparen . '\zs[([{]')
+      return match(unquoted, '\v^\s*}?' . noparen . '\zs[([{]')
     endif
   endif
 
@@ -325,6 +316,12 @@ function! GetHaskellIndent() abort
 
   return indent(s:prevnonblank(v:lnum - 1))
 
+endfunction
+
+" mask string and character literals, keeping the byte length
+function! s:unquote(line) abort
+  return substitute(a:line, '\v"%(\\.|[^"\\])*"|%([[:alnum:]_''])@<!''%(\\.|[^''\\])''',
+        \ '\=repeat("_", strlen(submatch(0)))', 'g')
 endfunction
 
 " prevnonblank with skipping macros
@@ -573,6 +570,22 @@ function! s:indent_eq() abort
   return match(getline(s:prevnonblank(v:lnum - 1)), '\v^\s*%(<where>|<let>)?\s*\zs') + &shiftwidth
 endfunction
 
+" case of
+function! s:indent_case(lnum) abort
+  let line = getline(a:lnum)
+  if get(g:, 'haskell_indent_disable_case', 0)
+    if line =~# '\v^\s*<where>'
+      return match(line, '\v^\s*<where>\s*\zs') + &shiftwidth
+    else
+      return indent(a:lnum) + &shiftwidth
+    endif
+  else
+    return line =~# '\v<case>.*<of>\s*([[:alnum:](\"''\[]|-\d)'
+          \ ? match(line, '\v<case>.*<of>\s*\zs\S')
+          \ : match(line, '\v.*<case>\s*\zs')
+  endif
+endfunction
+
 " }, ], )
 function! s:indent_parenthesis() abort
   let view = winsaveview()
@@ -584,6 +597,9 @@ function! s:indent_parenthesis() abort
   call winrestview(view)
   if begin[1] == end[1]
     return -1
+  endif
+  if strpart(getline(begin[1]), begin[2] - 1) =~# '\v^.\s*<case>.*<of>'
+    return s:indent_case(begin[1])
   endif
   if indent(end[1] - 1) + 1 < begin[2]
     return match(getline(begin[1]), '\v^\s*%(<where>|.*<let>)?\s*\zs')
